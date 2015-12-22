@@ -83,9 +83,18 @@ export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/
 #give environment to later buildpacks
 export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPPATH|PKG_CONFIG_PATH)='  > "$LP_DIR/export"
 
-# Once the installed packages are in the PATH, use Lua
+# Once the installed packages are in the PATH, use them.
 
-# Source compile LuaRocks to make the path prefix dyno-compatible
+# Build from source to have dyno-compatible path prefix
+topic "Building Lua"
+tar -xf vendor/lua-5.1.5.tar.gz
+cd lua-5.1.5
+./configure --prefix=$BUILD_DIR
+make
+make install
+cd ..
+
+topic "Building LuaRocks"
 tar -xf vendor/luarocks-2.2.2.tar.gz
 cd luarocks-2.2.2
 ./configure --prefix=$BUILD_DIR
