@@ -62,7 +62,7 @@ done
 
 LUAROCKS=$BUILD_DIR/.apt/usr/local/bin/luarocks
 
-for KONG_VERSION in $(cat $BUILD_DIR/kong-version); do
+for KONG_VERSION in $(cat kong-version); do
   topic "Installing Kong via LuaRocks"
   $LUAROCKS install kong $KONG_VERSION
 done
