@@ -71,6 +71,9 @@ mkdir -p $BUILD_DIR/bin
 mv kong-12f kong-12f.lua $BUILD_DIR/bin/
 mv config $BUILD_DIR/
 
+topic "Create NginX working directoy"
+mkdir -p $BUILD_DIR/nginx-working
+
 topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/000_apt.sh
