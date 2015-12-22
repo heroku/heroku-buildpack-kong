@@ -60,15 +60,15 @@ for DEB in $(ls -1 $APT_CACHE_DIR/archives/*.deb); do
   dpkg -x $DEB $BUILD_DIR/.apt/
 done
 
-LUAROCKS = $BUILD_DIR/.apt/usr/local/bin/luarocks
+LUAROCKS=$BUILD_DIR/.apt/usr/local/bin/luarocks
 
 for KONG_VERSION in $(cat $BUILD_DIR/kong-version); do
   topic "Installing Kong via LuaRocks"
-  eval $LUAROCKS install kong $KONG_VERSION
+  $LUAROCKS install kong $KONG_VERSION
 done
 
 topic "Enabling Kong 12-factor config"
-eval $LUAROCKS install etlua
+$LUAROCKS install etlua
 mkdir -p $BUILD_DIR/bin
 mv kong-12f kong-12f.lua $BUILD_DIR/bin/
 mv config $BUILD_DIR/
