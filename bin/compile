@@ -83,7 +83,16 @@ export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/
 #give environment to later buildpacks
 export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPPATH|PKG_CONFIG_PATH)='  > "$LP_DIR/export"
 
-# Once the installed packages are in the PATH, use Lua & LuaRocks
+# Once the installed packages are in the PATH, use Lua
+
+# Source compile LuaRocks to make the path prefix dyno-compatible
+tar -xf vendor/luarocks-2.2.2.tar.gz
+cd luarocks
+./configure --prefix=$BUILD_DIR
+make build
+make install
+cd ..
+
 for KONG_VERSION in $(cat kong-version); do
   topic "Installing Kong via LuaRocks"
   luarocks install kong $KONG_VERSION
