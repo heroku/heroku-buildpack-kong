@@ -11,6 +11,7 @@ set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 BP_DIR=`cd $(dirname $0); cd ..; pwd`
+VENDOR_DIR=${BP_DIR}/vendor
 
 # Make dyno runtime-compatible prefix for compiled artifacts
 APP_PREFIX=/app/.heroku
@@ -68,8 +69,8 @@ topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/000_apt.sh
 export PATH="\$HOME/.heroku/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$PATH"
-export LD_LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
-export LIBRARY_PATH="\$HOME/APP_PREFIX:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
+export LD_LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
+export LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
 export INCLUDE_PATH="\$HOME/.heroku/include:\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
 export CPATH="\$INCLUDE_PATH"
 export CPPPATH="\$INCLUDE_PATH"
@@ -79,8 +80,8 @@ export LUA_CPATH='/app/.luarocks/lib/lua/5.1/?.so;/app/.heroku/lib/lua/5.1/?.so;
 EOF
 
 export PATH="$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$PATH"
-export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:$LD_LIBRARY_PATH"
-export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:$LD_LIBRARY_PATH"
+export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:$LIBRARY_PATH"
 export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:$INCLUDE_PATH"
 export CPATH="$INCLUDE_PATH"
 export CPPPATH="$INCLUDE_PATH"
@@ -96,6 +97,37 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 
 # Build from source to have dyno-compatible path prefix
 cd vendor
+
+topic "Building OpenResty"
+# Build refs:
+# https://github.com/openresty/lua-nginx-module/issues/331#issuecomment-77279170
+# https://litespeed.io/dynamic-tls-certificates-with-openresty-and-ssl_certificate_by_lua/
+# http://openresty.org "Installation"
+
+# Set versions. Check http://openresty.org for latest version and bundled version of nginx.
+OPENRESTY_VERSION=1.9.3.2
+NGINX_VERSION=1.9.3
+LUANGINX_VERSION=0.9.19
+
+OPENRESTY_DIR=${VENDOR_DIR}/ngx_openresty-${OPENRESTY_VERSION}
+NGX_LUA_DIR=${OPENRESTY_DIR}/bundle/ngx_lua-${LUANGINX_VERSION}
+NGINX_DIR=${OPENRESTY_DIR}/bundle/nginx-${NGINX_VERSION}
+
+tar -xf ngx_openresty-${OPENRESTY_VERSION}.tar.gz
+
+# Patches for SSL-Lua integration
+tar -xf lua-nginx-module-ssl-cert-by-lua.tar.gz
+rm -rf ${NGX_LUA_DIR}/*
+cp -r lua-nginx-module-ssl-cert-by-lua/* ${NGX_LUA_DIR}/
+cd ${NGINX_DIR}/src/event
+patch < ${VENDOR_DIR}/lua-nginx-module-ssl-cert-by-lua/patches/nginx-ssl-cert.patch
+
+# Now we can build OpenResty / Nginx.
+cd ${OPENRESTY_DIR}
+./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module
+make
+make install
+cd ..
 
 topic "Building Lua"
 tar -xf lua-5.1.5.tar.gz
@@ -115,12 +147,15 @@ make install
 cd ..
 
 # Leave vendor/
-cd ..
+cd ${BP_DIR}
+
+topic "Installing Kong"
+luarocks install kong 0.5.4-1
 
 topic "Enabling Kong 12-factor config"
 luarocks install etlua
 mkdir -p $APP_PREFIX/bin
-mv kong kong-12f $APP_PREFIX/bin/
+mv kong-12f $APP_PREFIX/bin/
 mkdir -p $BUILD_DIR/config
 mv config/* $BUILD_DIR/config
 

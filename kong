@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-# Adapted from the `kong` binstub provided by the Kong Debian package.
-
-exec '/app/.apt/usr/local/bin/luajit' -e 'package.path="/app/.apt/usr/local/share/lua/5.1/?.lua;/app/.apt/usr/local/share/lua/5.1/?/init.lua;"..package.path; package.cpath="/app/.apt/usr/local/lib/lua/5.1/?.so;"..package.cpath' -e 'local k,l,_=pcall(require,"luarocks.loader") _=k and l.add_context("kong","0.5.4-1")' '/app/.apt/usr/local/lib/luarocks/rocks/kong/0.5.4-1/bin/kong' "$@"

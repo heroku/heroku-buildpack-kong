@@ -6,8 +6,8 @@ Configuration
 -------------
 
 * Buildtime
-  * Kong: the Kong `.deb` package URL, specified in [`apt-packages`](apt-packages)
-  * Lua & LuaRocks: source in [`vendor/`](vendor), used by [`bin/compile`](bin/compile)
+  * Kong: the Kong Lua rock (package), used by [`bin/compile`](bin/compile)
+  * Lua, LuaRocks, OpenResty: source in [`vendor/`](vendor), used by [`bin/compile`](bin/compile)
 * Runtime
   * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
 
@@ -48,3 +48,4 @@ Provisioning into a Heroku Private Space
 1. `heroku config:set GITHUB_AUTH_TOKEN={repo_access_token} -a kong-admin` (access to private Kong buildpack)
 1. `heroku sudo addons:create heroku-cassandra:alpha-dev -a kong-proxy`
 1. `heroku sudo addons:attach {cassandra-id} -a kong-admin`
+1. `heroku run "kong-12f && kong migrations reset -c config/kong.yml" -a kong-proxy`
