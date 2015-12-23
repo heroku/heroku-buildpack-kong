@@ -5,8 +5,11 @@ Heroku Buildpack for Kong
 Configuration
 -------------
 
-* Buildtime: LuaRocks Kong version specified in `kong-version`
-* Runtime: config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
+* Buildtime
+  * Kong: the Kong `.deb` package URL, specified in [`apt-packages`](apt-packages)
+  * Lua & LuaRocks: source in [`vendor/`](vendor), used by [`bin/compile`](bin/compile)
+* Runtime
+  * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
 
 
 Running

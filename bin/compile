@@ -86,9 +86,11 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 # Once the installed packages are in the PATH, use them.
 
 # Build from source to have dyno-compatible path prefix
+cd vendor
+
 topic "Building Lua"
-tar -xf vendor/lua-5.1.5.tar.gz
-cp vendor/lua-Makefile lua-5.1.5/Makefile
+tar -xf lua-5.1.5.tar.gz
+cp lua-Makefile lua-5.1.5/Makefile
 export LUA_PREFIX=$BUILD_DIR
 cd lua-5.1.5
 make
@@ -96,17 +98,14 @@ make install
 cd ..
 
 topic "Building LuaRocks"
-tar -xf vendor/luarocks-2.2.2.tar.gz
+tar -xf luarocks-2.2.2.tar.gz
 cd luarocks-2.2.2
 ./configure --prefix=$BUILD_DIR
 make build
 make install
 cd ..
 
-for KONG_VERSION in $(cat kong-version); do
-  topic "Installing Kong via LuaRocks"
-  luarocks install kong $KONG_VERSION
-done
+cd $BUILD_DIR
 
 topic "Enabling Kong 12-factor config"
 luarocks install etlua
