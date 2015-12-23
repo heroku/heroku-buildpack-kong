@@ -107,7 +107,7 @@ topic "Building OpenResty"
 # Set versions. Check http://openresty.org for latest version and bundled version of nginx.
 OPENRESTY_VERSION=1.9.3.1
 NGINX_VERSION=1.9.3
-LUANGINX_VERSION=0.9.19
+LUANGINX_VERSION=0.9.16
 
 OPENRESTY_DIR=${VENDOR_DIR}/ngx_openresty-${OPENRESTY_VERSION}
 NGX_LUA_DIR=${OPENRESTY_DIR}/bundle/ngx_lua-${LUANGINX_VERSION}
