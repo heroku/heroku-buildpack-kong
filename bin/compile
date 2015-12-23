@@ -79,7 +79,7 @@ export LUA_PATH='/app/.luarocks/share/lua/5.1/?.lua;/app/.luarocks/share/lua/5.1
 export LUA_CPATH='/app/.luarocks/lib/lua/5.1/?.so;/app/.heroku/lib/lua/5.1/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so'
 EOF
 
-export PATH="$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$PATH"
+export PATH="$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:/sbin:$PATH"
 export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:$LD_LIBRARY_PATH"
 export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:$LIBRARY_PATH"
 export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:$INCLUDE_PATH"
