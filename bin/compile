@@ -120,7 +120,7 @@ cd ..
 topic "Enabling Kong 12-factor config"
 luarocks install etlua
 mkdir -p $APP_PREFIX/bin
-mv kong-12f $APP_PREFIX/bin/
+mv kong kong-12f $APP_PREFIX/bin/
 mkdir -p $BUILD_DIR/config
 mv config/* $BUILD_DIR/config
 
