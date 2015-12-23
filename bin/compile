@@ -117,7 +117,7 @@ luarocks install etlua
 mkdir -p $APP_PREFIX/bin
 mv kong-12f $APP_PREFIX/bin/
 mkdir -p $BUILD_DIR/config
-mv config/* $BUILD_DIR/
+mv config/* $BUILD_DIR/config
 
 topic "Creating NginX working directory"
 mkdir -p $BUILD_DIR/nginx-working
