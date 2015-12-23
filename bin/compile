@@ -63,19 +63,19 @@ done
 topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/000_apt.sh
-export PATH="\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/bin:\$PATH"
-export LD_LIBRARY_PATH="\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
-export LIBRARY_PATH="\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
-export INCLUDE_PATH="\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
+export PATH="\$HOME/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$PATH"
+export LD_LIBRARY_PATH="\$HOME/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
+export LIBRARY_PATH="\$HOME/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
+export INCLUDE_PATH="\$HOME/include:\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
 export CPATH="\$INCLUDE_PATH"
 export CPPPATH="\$INCLUDE_PATH"
 export PKG_CONFIG_PATH="\$HOME/.apt/usr/local/lib/pkgconfig:\$HOME/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:\$HOME/.apt/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"
 EOF
 
-export PATH="$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/bin:$PATH"
-export LD_LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:$LD_LIBRARY_PATH"
-export LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:$LIBRARY_PATH"
-export INCLUDE_PATH="$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:$INCLUDE_PATH"
+export PATH="$BUILD_DIR/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$PATH"
+export LD_LIBRARY_PATH="$BUILD_DIR/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:$LD_LIBRARY_PATH"
+export LIBRARY_PATH="$BUILD_DIR/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:$LIBRARY_PATH"
+export INCLUDE_PATH="$BUILD_DIR/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:$INCLUDE_PATH"
 export CPATH="$INCLUDE_PATH"
 export CPPPATH="$INCLUDE_PATH"
 export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
@@ -98,7 +98,7 @@ cd ..
 topic "Building LuaRocks"
 tar -xf vendor/luarocks-2.2.2.tar.gz
 cd luarocks-2.2.2
-./configure --prefix=$BUILD_DIR --rocks-tree=$BUILD_DIR/lib/luarocks
+./configure --prefix=$BUILD_DIR
 make build
 make install
 cd ..
