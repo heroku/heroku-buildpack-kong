@@ -15,7 +15,7 @@ Configuration
 Running
 -------
 
-Execute `kong-12f` before every run, to configure from the environment.
+Execute `kong-12f` in the app root before every run, to configure from the environment.
 
 For example, the default web process is:
 ```
