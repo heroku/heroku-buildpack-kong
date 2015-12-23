@@ -15,6 +15,7 @@ BP_DIR=`cd $(dirname $0); cd ..; pwd`
 # Make dyno runtime-compatible prefix for compiled artifacts
 APP_PREFIX=/app/.heroku
 mkdir -p $APP_PREFIX
+ln -s $APP_PREFIX $BUILD_DIR/.heroku
 
 function error() {
   echo " !     $*" >&2
