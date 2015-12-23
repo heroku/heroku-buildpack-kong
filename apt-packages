@@ -1,3 +1,7 @@
 netcat
+libssl-dev
+libreadline-dev
+libncurses5-dev
+libpcre3-dev
 libpcre3
 dnsmasq
