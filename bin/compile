@@ -105,7 +105,8 @@ make build
 make install
 cd ..
 
-cd $BUILD_DIR
+# Leave vendor/
+cd ..
 
 topic "Enabling Kong 12-factor config"
 luarocks install etlua
