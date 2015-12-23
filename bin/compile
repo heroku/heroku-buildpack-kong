@@ -88,8 +88,8 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 # Build from source to have dyno-compatible path prefix
 topic "Building Lua"
 tar -xf vendor/lua-5.1.5.tar.gz
+cp vendor/lua-Makefile lua-5.1.5/Makefile
 cd lua-5.1.5
-./configure --prefix=$BUILD_DIR
 make
 make install
 cd ..
