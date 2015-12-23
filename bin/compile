@@ -89,6 +89,7 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 topic "Building Lua"
 tar -xf vendor/lua-5.1.5.tar.gz
 cp vendor/lua-Makefile lua-5.1.5/Makefile
+export LUA_PREFIX=BUILD_DIR
 cd lua-5.1.5
 make
 make install
