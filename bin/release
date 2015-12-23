@@ -3,7 +3,7 @@
 cat << EOF
 ---
 addons:
-  - heroku-cassandra
+  - heroku-cassandra:alpha-dev
 default_process_types:
   web: kong-12f && kong start -c config/kong.yml
 EOF
