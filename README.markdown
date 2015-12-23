@@ -41,8 +41,10 @@ Provisioning into a Heroku Private Space
 
 1. `heroku spaces:create 8th-wonder --org heroku-cto --region virginia`
 1. `heroku apps:create kong-proxy --space 8th-wonder`
-1. `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git -a kong-proxy`
+1. `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi.git -a kong-proxy`
+1. `heroku config:set GITHUB_AUTH_TOKEN={repo_access_token} -a kong-proxy` (access to private Kong buildpack)
 1. `heroku apps:create kong-admin --space 8th-wonder`
-1. `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git -a kong-admin`
+1. `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi.git -a kong-admin`
+1. `heroku config:set GITHUB_AUTH_TOKEN={repo_access_token} -a kong-admin` (access to private Kong buildpack)
 1. `heroku sudo addons:create heroku-cassandra:alpha-dev -a kong-proxy`
 1. `heroku sudo addons:attach {cassandra-id} -a kong-admin`
