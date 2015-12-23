@@ -98,7 +98,7 @@ cd ..
 topic "Building LuaRocks"
 tar -xf vendor/luarocks-2.2.2.tar.gz
 cd luarocks-2.2.2
-./configure --prefix=$BUILD_DIR
+./configure --prefix=$BUILD_DIR --rocks-tree=$BUILD_DIR/lib/luarocks
 make build
 make install
 cd ..
