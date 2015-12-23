@@ -112,7 +112,7 @@ topic "Enabling Kong 12-factor config"
 luarocks install etlua
 mkdir -p $BUILD_DIR/bin
 mv kong-12f $BUILD_DIR/bin/
-mv config $BUILD_DIR/
+mv config/* $BUILD_DIR/
 
 topic "Create NginX working directoy"
 mkdir -p $BUILD_DIR/nginx-working
