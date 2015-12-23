@@ -105,7 +105,7 @@ topic "Building OpenResty"
 # http://openresty.org "Installation"
 
 # Set versions. Check http://openresty.org for latest version and bundled version of nginx.
-OPENRESTY_VERSION=1.9.3.2
+OPENRESTY_VERSION=1.9.3.1
 NGINX_VERSION=1.9.3
 LUANGINX_VERSION=0.9.19
 
