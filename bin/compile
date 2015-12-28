@@ -98,17 +98,6 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 # Build from source to have dyno-compatible path prefix
 cd vendor
 
-topic "Building OpenSSL"
-OPENSSL_VERSION=1.0.2e
-
-tar -xf openssl-${OPENSSL_VERSION}.tar.gz
-cd openssl-${OPENSSL_VERSION}
-./config --prefix=$APP_PREFIX
-make
-make test
-make install
-cd ..
-
 topic "Building OpenResty"
 # Build refs:
 # https://github.com/openresty/lua-nginx-module/issues/331#issuecomment-77279170
@@ -116,14 +105,17 @@ topic "Building OpenResty"
 # http://openresty.org "Installation"
 
 # Set versions. Check http://openresty.org for latest version and bundled version of nginx.
+OPENSSL_VERSION=1.0.2e
 OPENRESTY_VERSION=1.9.3.1
 NGINX_VERSION=1.9.3
 LUANGINX_VERSION=0.9.16
 
+OPENSSL_DIR=${VENDOR_DIR}/openssl-${OPENSSL_VERSION}
 OPENRESTY_DIR=${VENDOR_DIR}/ngx_openresty-${OPENRESTY_VERSION}
 NGX_LUA_DIR=${OPENRESTY_DIR}/bundle/ngx_lua-${LUANGINX_VERSION}
 NGINX_DIR=${OPENRESTY_DIR}/bundle/nginx-${NGINX_VERSION}
 
+tar -xf openssl-${OPENSSL_VERSION}.tar.gz
 tar -xf ngx_openresty-${OPENRESTY_VERSION}.tar.gz
 
 # Patches for SSL-Lua integration
@@ -135,7 +127,7 @@ patch < ${VENDOR_DIR}/lua-nginx-module-ssl-cert-by-lua/patches/nginx-ssl-cert.pa
 
 # Now we can build OpenResty / Nginx.
 cd ${OPENRESTY_DIR}
-./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module
+./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${OPENSSL_DIR}
 make
 make install
 cd ..
