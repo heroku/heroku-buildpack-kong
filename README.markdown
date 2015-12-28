@@ -6,8 +6,8 @@ Configuration
 -------------
 
 * Buildtime
-  * Kong: the Kong Lua rock (package), used by [`bin/compile`](bin/compile)
-  * Lua, LuaRocks, OpenResty: source in [`vendor/`](vendor), used by [`bin/compile`](bin/compile)
+  * sources in [`vendor/`](vendor) used by [`bin/compile`](bin/compile)
+  * additional system packages in [`apt-packages`](apt-packages)
 * Runtime
   * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
 
