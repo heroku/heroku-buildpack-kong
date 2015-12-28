@@ -1,4 +1,4 @@
-Heroku Buildpack for Kong
+Heroku Buildpack for [Kong](https://getkong.org)
 =========================
 
 
@@ -12,8 +12,9 @@ Configuration
   * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
 
 
-Running
--------
+Usage
+-----
+To use this buildpack for an app, `config/kong.yml.etlua` must exist. Copy it from [this repo](config/kong.yml.etlua), or clone the [heroku-kong app](https://github.com/heroku/heroku-kong).
 
 Execute `kong-12f` in the app root before every run, to configure from the environment.
 
@@ -34,6 +35,15 @@ kong-12f && kong start -c config/kong.yml
 * Exposes a single service per instance (app/dyno)
   * `KONG_EXPOSE=proxy` for the gateway (default)
   * `KONG_EXPOSE=admin` for the Admin API
+
+
+Background
+----------
+Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local`. So, we vendor the sources & compile them with a compatible, writable `/app/.heroku` prefix.
+
+OpenResty is patched according to Kong's [compile from source docs](https://getkong.org/install/source/).
+
+OpenSSL 1.0.2 (required by OpenResty) is also compiled from source, as the versions included in the Cedar 14 stack & apt packages for Ubuntu/Trusty are too old.
 
 
 Provisioning into a Heroku Private Space
