@@ -98,6 +98,17 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 # Build from source to have dyno-compatible path prefix
 cd vendor
 
+topic "Building OpenSSL"
+OPENSSL_VERSION=1.0.2e
+
+tar -xf openssl-${OPENSSL_VERSION}.tar.gz
+cd openssl-${OPENSSL_VERSION}
+./config --prefix=$APP_PREFIX
+make
+make test
+make install
+cd ..
+
 topic "Building OpenResty"
 # Build refs:
 # https://github.com/openresty/lua-nginx-module/issues/331#issuecomment-77279170
