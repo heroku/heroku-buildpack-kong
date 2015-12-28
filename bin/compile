@@ -124,7 +124,7 @@ patch < ${VENDOR_DIR}/lua-nginx-module-ssl-cert-by-lua/patches/nginx-ssl-cert.pa
 
 # Now we can build OpenResty / Nginx.
 cd ${OPENRESTY_DIR}
-./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=/usr/include
+./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module
 make
 make install
 cd ..
