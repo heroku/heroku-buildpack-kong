@@ -149,11 +149,14 @@ make build
 make install
 cd ..
 
+topic "Building Kong"
+tar -xf kong-0.5.4.tar.gz
+cd kong-0.5.4
+luarocks build ./kong-0.5.4-1.rockspec
+cd ..
+
 # Leave vendor/
 cd ${BP_DIR}
-
-topic "Installing Kong"
-luarocks install kong 0.5.4-1
 
 topic "Enabling Kong 12-factor config"
 luarocks install etlua
