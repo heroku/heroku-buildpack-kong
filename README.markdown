@@ -1,7 +1,6 @@
 Heroku Buildpack for [Kong](https://getkong.org)
 =========================
 
-
 Configuration
 -------------
 
@@ -39,6 +38,8 @@ kong-12f && kong start -c config/kong.yml
 
 Background
 ----------
+The first time this buildpack builds an app, the build time will be significantly longer as Kong and its dependencies are compiled from source. **The compiled artifacts are cached to speed up subsequent builds.**
+
 We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with a writable `/app/.heroku` prefix. Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local` which is read-only in a dyno.
 
 OpenResty is patched according to Kong's [compile from source docs](https://getkong.org/install/source/).
@@ -46,6 +47,17 @@ OpenResty is patched according to Kong's [compile from source docs](https://getk
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source, as the versions included in the Cedar 14 stack & apt packages for Ubuntu/Trusty are too old.
 
 Kong source is vendored and installed via `luarocks`, because LuaRocks does not reliably provide `kong`. (Was the 0.5.4 version yanked?)
+
+
+Modification
+------------
+This buildpack caches its compilation artifacts from the sources in `vendor/`. Changes to the sources in `vendor/` will be detected and the cache ignored.
+
+If you need to trigger a full rebuild without changing the source, use the [Heroku Repo CLI plugin](https://github.com/heroku/heroku-repo) to purge the cache:
+
+```bash
+heroku repo:purge_cache
+```
 
 
 Provisioning into a Heroku Private Space

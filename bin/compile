@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir>
 
-# fail fast
+# Fail immediately on non-zero exit code.
 set -e
-
-# debug
-# set -x
+# Fail immediately on non-zero exit code within a pipeline.
+set -o pipefail
+# Fail on undeclared variables.
+set -u
+# Debug, echo every command
+#set -x
 
 # parse and derive params
 BUILD_DIR=$1
@@ -16,6 +19,10 @@ VENDOR_DIR=${BP_DIR}/vendor
 # Make dyno runtime-compatible prefix for compiled artifacts
 APP_PREFIX=/app/.heroku
 mkdir -p $APP_PREFIX
+
+# Cache compilation artifacts between builds
+MAKE_CACHE_DIR="$CACHE_DIR/heroku-kong-buildpack"
+mkdir -p $MAKE_CACHE_DIR
 
 function error() {
   echo " !     $*" >&2
@@ -80,12 +87,12 @@ export LUA_CPATH='/app/.luarocks/lib/lua/5.1/?.so;/app/.heroku/lib/lua/5.1/?.so;
 EOF
 
 export PATH="$APP_PREFIX/bin:$APP_PREFIX/nginx/sbin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
-export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:$LD_LIBRARY_PATH"
-export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:$LIBRARY_PATH"
-export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:$INCLUDE_PATH"
+export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
+export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
+export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include"
 export CPATH="$INCLUDE_PATH"
 export CPPPATH="$INCLUDE_PATH"
-export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig"
 # Generated with `luarocks path` in a one-off dyno
 export LUA_PATH='/app/.luarocks/share/lua/5.1/?.lua;/app/.luarocks/share/lua/5.1/?/init.lua;/app/.heroku/share/lua/5.1/?.lua;/app/.heroku/share/lua/5.1/?/init.lua;./?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/lib/lua/5.1/?.lua;/usr/local/lib/lua/5.1/?/init.lua'
 export LUA_CPATH='/app/.luarocks/lib/lua/5.1/?.so;/app/.heroku/lib/lua/5.1/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so'
@@ -96,66 +103,137 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 # Once the installed packages are in the PATH, use them.
 
 # Build from source to have dyno-compatible path prefix
-cd vendor
-
-topic "Building OpenResty"
-# Build refs:
-# https://github.com/openresty/lua-nginx-module/issues/331#issuecomment-77279170
-# https://litespeed.io/dynamic-tls-certificates-with-openresty-and-ssl_certificate_by_lua/
-# http://openresty.org "Installation"
-
 # Set versions. Check http://openresty.org for latest version and bundled version of nginx.
 OPENSSL_VERSION=1.0.2e
 OPENRESTY_VERSION=1.9.3.1
 NGINX_VERSION=1.9.3
 LUANGINX_VERSION=0.9.16
+LUA_VERSION=5.1.5
+LUAROCKS_VERSION=2.2.2
+KONG_VERSION=0.5.4
+KONG_ROCK_VERSION=${KONG_VERSION}-1
 
-OPENSSL_DIR=${VENDOR_DIR}/openssl-${OPENSSL_VERSION}
-OPENRESTY_DIR=${VENDOR_DIR}/ngx_openresty-${OPENRESTY_VERSION}
+# For Lua's `Makefile`
+export LUA_PREFIX=$APP_PREFIX
+
+# Cache the build
+VENDOR_CACHE_DIR=${MAKE_CACHE_DIR}/vendor
+mkdir -p ${VENDOR_CACHE_DIR}
+
+OPENSSL_DIR=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
+OPENRESTY_DIR=${VENDOR_CACHE_DIR}/ngx_openresty-${OPENRESTY_VERSION}
 NGX_LUA_DIR=${OPENRESTY_DIR}/bundle/ngx_lua-${LUANGINX_VERSION}
 NGINX_DIR=${OPENRESTY_DIR}/bundle/nginx-${NGINX_VERSION}
 
-tar -xf openssl-${OPENSSL_VERSION}.tar.gz
-tar -xf ngx_openresty-${OPENRESTY_VERSION}.tar.gz
+# Detect changes in the vendor/ sources
+topic "Detecting changes in vendor/"
+cd ${VENDOR_DIR}
+VENDOR_DIFF=${MAKE_CACHE_DIR}/.vendor-diff
+VENDOR_HASH=${MAKE_CACHE_DIR}/.vendor-hash
+VENDOR_HASH_NEW=${VENDOR_HASH}-new
+touch ${VENDOR_DIFF}
+touch ${VENDOR_HASH}
+touch ${VENDOR_HASH_NEW}
+openssl dgst -sha1 * > ${VENDOR_HASH_NEW}
+# `diff` signals differences with exit codes. Don't fail fast.
+set +e
+diff ${VENDOR_HASH} ${VENDOR_HASH_NEW} > ${VENDOR_DIFF}
+DIFF_STATUS=$?
+set -e
+mv -f ${VENDOR_HASH_NEW} ${VENDOR_HASH}
 
-# Patches for SSL-Lua integration
-tar -xf lua-nginx-module-ssl-cert-by-lua.tar.gz
-rm -rf ${NGX_LUA_DIR}/*
-cp -r lua-nginx-module-ssl-cert-by-lua/* ${NGX_LUA_DIR}/
-cd ${NGINX_DIR}/src/event
-patch < ${VENDOR_DIR}/lua-nginx-module-ssl-cert-by-lua/patches/nginx-ssl-cert.patch
+if [ "$DIFF_STATUS" == 1 ]
+then
+  topic "Changes detected"
+  IFS=$'\n' 
+  for DIFF_LINE in $(cat "$VENDOR_DIFF"); do
+    echo "       $DIFF_LINE"
+  done
+  unset IFS
 
-# Now we can build OpenResty / Nginx.
-cd ${OPENRESTY_DIR}
-./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${OPENSSL_DIR}
-make
-make install
-cd ..
+  # Clean-up previous cache
+  rm ${VENDOR_DIFF}
+  rm -rf ${VENDOR_CACHE_DIR}
+  # and cache the new source code
+  mv ${VENDOR_DIR} ${VENDOR_CACHE_DIR}
+  cd ${VENDOR_CACHE_DIR}
 
-topic "Building Lua"
-tar -xf lua-5.1.5.tar.gz
-cp lua-Makefile lua-5.1.5/Makefile
-export LUA_PREFIX=$APP_PREFIX
-cd lua-5.1.5
-make
-make install
-cd ..
+  topic "Building OpenResty"
+  # Build refs:
+  # https://github.com/openresty/lua-nginx-module/issues/331#issuecomment-77279170
+  # https://litespeed.io/dynamic-tls-certificates-with-openresty-and-ssl_certificate_by_lua/
+  # http://openresty.org "Installation"
 
-topic "Building LuaRocks"
-tar -xf luarocks-2.2.2.tar.gz
-cd luarocks-2.2.2
-./configure --prefix=$APP_PREFIX
-make build
-make install
-cd ..
+  tar -xf openssl-${OPENSSL_VERSION}.tar.gz
+  tar -xf ngx_openresty-${OPENRESTY_VERSION}.tar.gz
 
-topic "Building Kong"
-tar -xf kong-0.5.4.tar.gz
-cd kong-0.5.4
-luarocks build ./kong-0.5.4-1.rockspec
-cd ..
+  # Patches for SSL-Lua integration
+  tar -xf lua-nginx-module-ssl-cert-by-lua.tar.gz
+  rm -rf ${NGX_LUA_DIR}/*
+  cp -r lua-nginx-module-ssl-cert-by-lua/* ${NGX_LUA_DIR}/
+  cd ${NGINX_DIR}/src/event
+  patch < ${VENDOR_CACHE_DIR}/lua-nginx-module-ssl-cert-by-lua/patches/nginx-ssl-cert.patch
 
-# Leave vendor/
+  # Now we can build OpenResty / Nginx.
+  cd ${OPENRESTY_DIR}
+  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${OPENSSL_DIR}
+  make
+  make install
+  cd ..
+
+  topic "Building Lua"
+  tar -xf lua-${LUA_VERSION}.tar.gz
+  cp lua-Makefile lua-${LUA_VERSION}/Makefile
+  cd lua-${LUA_VERSION}
+  # `Makefile` sets prefix via $LUA_PREFIX
+  make
+  make install
+  cd ..
+
+  topic "Building LuaRocks"
+  tar -xf luarocks-${LUAROCKS_VERSION}.tar.gz
+  cd luarocks-${LUAROCKS_VERSION}
+  ./configure --prefix=$APP_PREFIX
+  make build
+  make install
+  cd ..  
+
+  topic "Building Kong"
+  tar -xf kong-${KONG_VERSION}.tar.gz
+  cd kong-${KONG_VERSION}
+  luarocks build --pack-binary-rock ./kong-${KONG_ROCK_VERSION}.rockspec
+  luarocks install kong-${KONG_ROCK_VERSION}.all.rock
+  cd ..
+
+elif [ "$DIFF_STATUS" == 0 ]
+then
+  cd ${VENDOR_CACHE_DIR}
+
+  topic "Using cached OpenResty"
+  cd ${OPENRESTY_DIR}
+  make install
+  cd ..
+
+  topic "Using cached Lua"
+  cd lua-${LUA_VERSION}
+  make install
+  cd ..
+
+  topic "Using cached LuaRocks"
+  cd luarocks-${LUAROCKS_VERSION}
+  make install
+  cd ..
+
+  topic "Using cached Kong"
+  cd kong-${KONG_VERSION}
+  luarocks install kong-${KONG_ROCK_VERSION}.all.rock
+  cd ..
+
+else
+  error "Error detecting cached build: `diff` exited ${DIFF_STATUS}"
+fi
+
+# Leave cached vendor/
 cd ${BP_DIR}
 
 topic "Enabling Kong 12-factor config"
