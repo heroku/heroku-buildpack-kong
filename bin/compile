@@ -21,8 +21,9 @@ APP_PREFIX=/app/.heroku
 mkdir -p $APP_PREFIX
 
 # Cache compilation artifacts between builds
-MAKE_CACHE_DIR="$CACHE_DIR/heroku-kong-buildpack"
-mkdir -p $MAKE_CACHE_DIR
+BP_CACHE_DIR="$CACHE_DIR/heroku-kong-buildpack"
+mkdir -p $BP_CACHE_DIR
+PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
 function error() {
   echo " !     $*" >&2
@@ -113,11 +114,8 @@ LUAROCKS_VERSION=2.2.2
 KONG_VERSION=0.5.4
 KONG_ROCK_VERSION=${KONG_VERSION}-1
 
-# For Lua's `Makefile`
-export LUA_PREFIX=$APP_PREFIX
-
 # Cache the build
-VENDOR_CACHE_DIR=${MAKE_CACHE_DIR}/vendor
+VENDOR_CACHE_DIR=${BP_CACHE_DIR}/vendor
 mkdir -p ${VENDOR_CACHE_DIR}
 
 OPENSSL_DIR=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
@@ -128,8 +126,8 @@ NGINX_DIR=${OPENRESTY_DIR}/bundle/nginx-${NGINX_VERSION}
 # Detect changes in the vendor/ sources
 topic "Detecting changes in vendor/"
 cd ${VENDOR_DIR}
-VENDOR_DIFF=${MAKE_CACHE_DIR}/.vendor-diff
-VENDOR_HASH=${MAKE_CACHE_DIR}/.vendor-hash
+VENDOR_DIFF=${BP_CACHE_DIR}/.vendor-diff
+VENDOR_HASH=${BP_CACHE_DIR}/.vendor-hash
 VENDOR_HASH_NEW=${VENDOR_HASH}-new
 touch ${VENDOR_DIFF}
 touch ${VENDOR_HASH}
@@ -142,7 +140,12 @@ DIFF_STATUS=$?
 set -e
 mv -f ${VENDOR_HASH_NEW} ${VENDOR_HASH}
 
-if [ "$DIFF_STATUS" == 1 ]
+if [ "$DIFF_STATUS" == 0 ] && [ -d "$PREFIX_CACHE_DIR" ]
+then
+  topic "Restoring from cache"
+  cp -R $PREFIX_CACHE_DIR/* $APP_PREFIX/
+
+elif [ "$DIFF_STATUS" == 1 ]
 then
   topic "Changes detected"
   IFS=$'\n' 
@@ -185,7 +188,7 @@ then
   tar -xf lua-${LUA_VERSION}.tar.gz
   cp lua-Makefile lua-${LUA_VERSION}/Makefile
   cd lua-${LUA_VERSION}
-  # `Makefile` sets prefix via $LUA_PREFIX
+  export LUA_PREFIX=$APP_PREFIX
   make
   make install
   cd ..
@@ -205,29 +208,13 @@ then
   luarocks install kong-${KONG_ROCK_VERSION}.all.rock
   cd ..
 
-elif [ "$DIFF_STATUS" == 0 ]
-then
-  cd ${VENDOR_CACHE_DIR}
+  topic "Installing additional Lua rocks"
+  # For config/kong-12f.lua
+  luarocks install etlua
 
-  topic "Using cached OpenResty"
-  cd ${OPENRESTY_DIR}
-  make install
-  cd ..
-
-  topic "Using cached Lua"
-  cd lua-${LUA_VERSION}
-  make install
-  cd ..
-
-  topic "Using cached LuaRocks"
-  cd luarocks-${LUAROCKS_VERSION}
-  make install
-  cd ..
-
-  topic "Using cached Kong"
-  cd kong-${KONG_VERSION}
-  luarocks install kong-${KONG_ROCK_VERSION}.all.rock
-  cd ..
+  topic "Caching build"
+  mkdir -p $PREFIX_CACHE_DIR
+  cp -R $APP_PREFIX/* $PREFIX_CACHE_DIR/
 
 else
   error "Error detecting cached build: `diff` exited ${DIFF_STATUS}"
@@ -237,7 +224,6 @@ fi
 cd ${BP_DIR}
 
 topic "Enabling Kong 12-factor config"
-luarocks install etlua
 mkdir -p $APP_PREFIX/bin
 mv kong-12f $APP_PREFIX/bin/
 mkdir -p $BUILD_DIR/config
