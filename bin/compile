@@ -217,7 +217,7 @@ then
   cp -R $APP_PREFIX/* $PREFIX_CACHE_DIR/
 
 else
-  error "Error detecting cached build: `diff` exited ${DIFF_STATUS}"
+  error "Error detecting cached build: diff exited ${DIFF_STATUS}"
 fi
 
 # Leave cached vendor/
