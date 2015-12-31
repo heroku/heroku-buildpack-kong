@@ -145,7 +145,7 @@ then
   topic "Restoring from cache"
   cp -R $PREFIX_CACHE_DIR/* $APP_PREFIX/
 
-elif [ "$DIFF_STATUS" == 1 ]
+elif [ "$DIFF_STATUS" == 0 ] || [ "$DIFF_STATUS" == 1 ]
 then
   topic "Changes detected"
   IFS=$'\n' 
