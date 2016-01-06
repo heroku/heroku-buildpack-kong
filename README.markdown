@@ -4,26 +4,23 @@ Heroku Buildpack for [Kong](https://getkong.org)
 Configuration
 -------------
 
-* Buildtime
-  * sources in [`vendor/`](vendor) used by [`bin/compile`](bin/compile)
-  * additional system packages in [`apt-packages`](apt-packages)
+* Buildtime 
+  * sources in the buildpack's [`vendor/`](vendor) used by [`bin/compile`](bin/compile)
+  * additional system packages in the buildpack's [`apt-packages`](apt-packages)
+  * Lua rocks: specify in the app's `.luarocks` file; each line is `{NAME} {VERSION}`
 * Runtime
-  * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
+  * config template in `config/kong.yml.etlua`
+    * buildpack detects this file in the app
+    * [sample config file](config/kong.yml.etlua.sample)
 * [Kong/Nginx plugins](https://getkong.org/docs/0.5.x/plugin-development/) & other Lua modules
-  * Install via Lua source or rock:
-    * Source modules in the app's `lib/` named like:
+  * Lua source in the app
+    * [Kong plugins](https://getkong.org/docs/0.5.x/plugin-development/):
+      * `lib/kong/plugins/{NAME}`
+      * See: [Plugin File Structure](https://getkong.org/docs/0.5.x/plugin-development/file-structure/)
+    * Other Lua modules:
       * `lib/{NAME}.lua` or
       * `lib/{NAME}/init.lua`
-    * Rocks specified in the app's `.luarocks` file:
-
-      Each line is `{NAME} {VERSION}`. Example:
-
-      ```
-xml 1.1.3-1
-serpent 0.27-1
-      ```
-  * Add each module name to the `plugins_available` list in `config/kong.yml.etlua` 
-
+  * Add each Kong plugin name to the `plugins_available` list in `config/kong.yml.etlua` 
 
 Usage
 -----

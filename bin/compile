@@ -219,22 +219,12 @@ else
   error "Error detecting cached build: diff exited ${DIFF_STATUS}"
 fi
 
-# Leave cached vendor/
-cd ${BP_DIR}
-
-topic "Installing Lua rocks from .luarocks"
-./bin/install-luarocks
-
-topic "Adding app's Lua modules (optional)"
-if [ -d "lib" ]
-then
-  topic "Using lib/"
-  mv lib $BUILD_DIR/lib
-else
-  topic "No lib/ found"
-fi
+topic "Installing Lua rocks specified in .luarocks"
+cd ${BUILD_DIR}
+${BP_DIR}/bin/install-luarocks
 
 topic "Enabling Kong 12-factor config"
+cd ${BP_DIR}
 mkdir -p $APP_PREFIX/bin
 mv kong-12f $APP_PREFIX/bin/
 mkdir -p $BUILD_DIR/config
