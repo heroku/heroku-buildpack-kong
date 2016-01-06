@@ -9,11 +9,20 @@ Configuration
   * additional system packages in [`apt-packages`](apt-packages)
 * Runtime
   * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
-* [Kong/Nginx plugins](https://getkong.org/docs/0.5.x/plugin-development/)
-  * Lua modules in `lib/` named like:
-    * `lib/{NAME}.lua` or
-    * `lib/{NAME}/init.lua`
-  * Add the module names to the `plugins_available` list in `config/kong.yml.etlua` 
+* [Kong/Nginx plugins](https://getkong.org/docs/0.5.x/plugin-development/) & other Lua modules
+  * Install via Lua source or rock:
+    * Source modules in the app's `lib/` named like:
+      * `lib/{NAME}.lua` or
+      * `lib/{NAME}/init.lua`
+    * Rocks specified in the app's `.luarocks` file:
+
+      Each line is `{NAME} {VERSION}`. Example:
+
+      ```
+xml 1.1.3-1
+serpent 0.27-1
+      ```
+  * Add each module name to the `plugins_available` list in `config/kong.yml.etlua` 
 
 
 Usage
