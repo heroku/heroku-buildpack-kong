@@ -4,12 +4,23 @@ Heroku Buildpack for [Kong](https://getkong.org)
 Configuration
 -------------
 
-* Buildtime
-  * sources in [`vendor/`](vendor) used by [`bin/compile`](bin/compile)
-  * additional system packages in [`apt-packages`](apt-packages)
+* Buildtime 
+  * sources in the buildpack's [`vendor/`](vendor) used by [`bin/compile`](bin/compile)
+  * additional system packages in the buildpack's [`apt-packages`](apt-packages)
+  * Lua rocks: specify in the app's `.luarocks` file; each line is `{NAME} {VERSION}`
 * Runtime
-  * config template in `config/kong.yml.etlua` (Kong buildpack detects this file in the app)
-
+  * config template in `config/kong.yml.etlua`
+    * buildpack detects this file in the app
+    * [sample config file](config/kong.yml.etlua.sample)
+* [Kong/Nginx plugins](https://getkong.org/docs/0.5.x/plugin-development/) & other Lua modules
+  * Lua source in the app
+    * [Kong plugins](https://getkong.org/docs/0.5.x/plugin-development/):
+      * `lib/kong/plugins/{NAME}`
+      * See: [Plugin File Structure](https://getkong.org/docs/0.5.x/plugin-development/file-structure/)
+    * Other Lua modules:
+      * `lib/{NAME}.lua` or
+      * `lib/{NAME}/init.lua`
+  * Add each Kong plugin name to the `plugins_available` list in `config/kong.yml.etlua` 
 
 Usage
 -----
@@ -58,18 +69,3 @@ If you need to trigger a full rebuild without changing the source, use the [Hero
 ```bash
 heroku repo:purge_cache
 ```
-
-
-Provisioning into a Heroku Private Space
-----------------------------------------
-
-1. `heroku spaces:create 8th-wonder --org heroku-cto --region virginia`
-1. `heroku apps:create kong-proxy --space 8th-wonder`
-1. `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi.git -a kong-proxy`
-1. `heroku config:set GITHUB_AUTH_TOKEN={repo_access_token} -a kong-proxy` (access to private Kong buildpack)
-1. `heroku apps:create kong-admin --space 8th-wonder`
-1. `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi.git -a kong-admin`
-1. `heroku config:set GITHUB_AUTH_TOKEN={repo_access_token} KONG_EXPOSE=admin -a kong-admin` (access to private Kong buildpack)
-1. `heroku sudo addons:create heroku-cassandra:alpha-dev -a kong-proxy`
-1. `heroku addons:attach {cassandra-id} -a kong-admin`
-1. `heroku run "kong-12f && kong migrations reset -c config/kong.yml" -a kong-proxy`
