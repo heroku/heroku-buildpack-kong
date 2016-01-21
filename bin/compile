@@ -209,7 +209,8 @@ then
 
   topic "Installing additional Lua rocks"
   # For config/kong-12f.lua
-  luarocks install etlua
+  luarocks install etlua 1.2.0-1
+  luarocks install moses 1.4.0-1
 
   topic "Caching build"
   mkdir -p $PREFIX_CACHE_DIR

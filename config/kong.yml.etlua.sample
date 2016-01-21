@@ -48,7 +48,7 @@ databases_available:
       keyspace: "<%= cassandra_keyspace %>"
       timeout: 1000
       keepalive: 60000 # in milliseconds
-      ssl: true
+      ssl: <%= cassandra_ssl %>
       ssl_verify: true
       ssl_certificate: "/<%= cassandra_cert %>"
 
