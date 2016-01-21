@@ -207,10 +207,6 @@ then
   luarocks install kong-${KONG_ROCK_VERSION}.all.rock
   cd ..
 
-  topic "Installing additional Lua rocks"
-  # For config/kong-12f.lua
-  luarocks install etlua
-
   topic "Caching build"
   mkdir -p $PREFIX_CACHE_DIR
   cp -R $APP_PREFIX/* $PREFIX_CACHE_DIR/
@@ -218,6 +214,10 @@ then
 else
   error "Error detecting cached build: diff exited ${DIFF_STATUS}"
 fi
+
+topic "Installing Lua rocks for kong-12f"
+luarocks install etlua 1.2.0-1
+luarocks install moses 1.4.0-1
 
 topic "Installing Lua rocks specified in .luarocks"
 cd ${BUILD_DIR}
