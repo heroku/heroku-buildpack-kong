@@ -33,19 +33,29 @@ For example, the default web process is:
 kong-12f && kong start -c config/kong.yml
 ```
 
-* Kong config via environment variables
-  * `CASSANDRA_URL`
-  * `CASSANDRA_TRUSTED_CERT`
-  * `PORT`
-  * `KONG_EXPOSE`
-* Parses the `CASSANDRA_URL` as a comma-delimited list of contact points with the format:
-  ```
-  cassandra://username:password@x.x.x.x:port/keyspace,cassandra://username:password@y.y.y.y:port/keyspace
-  ```
-* Exposes a single service per instance (app/dyno)
-  * `KONG_EXPOSE=proxy` for the gateway (default)
-  * `KONG_EXPOSE=admin` for the Admin API
+### Environment variables
 
+  * Port exposed on the app/dyno
+    * `PORT`
+    * Listener assigned to the port:
+      * `KONG_EXPOSE=proxy` for the gateway (default)
+      * `KONG_EXPOSE=admin` for the Admin API
+  * Cassandra datastore
+    * Heroku-style config vars
+      * `CASSANDRA_URL`
+        ```
+cassandra://username:password@x.x.x.x:port/keyspace,cassandra://username:password@y.y.y.y:port/keyspace
+        ```
+      * `CASSANDRA_TRUSTED_CERT` (SSL is disabled unless provided)
+    * [Instaclustr add-on](https://elements.heroku.com/addons/instaclustr) config vars
+      * `IC_CONTACT_POINTS`
+        ```
+x.x.x.x,y.y.y.y
+        ```
+      * `IC_PORT`
+      * `IC_USER`
+      * `IC_PASSWORD`
+      * `IC_CERTIFICATE` (SSL is disabled unless provided)
 
 Background
 ----------
