@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-SRC_DIR=$(pwd)
-BIN_DIR=$(cd "$(dirname "$0")"; pwd)
-
-lua $SRC_DIR/config/kong-12f.lua $SRC_DIR/config/kong.yml.etlua $SRC_DIR/config
