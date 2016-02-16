@@ -10,6 +10,15 @@ local services = require "kong.cli.utils.services"
 local cluster_utils = require "kong.tools.cluster"
 local serf_service = require "kong.cli.services.serf"
 
+-- exit success so that the dyno will start-up anyway
+local function eager_fail()
+  print('')
+  print('Failed to configure Kong environment')
+  os.exit()
+end
+
+local rel_config_file = "config/kong.yml"
+
 -- 12-factor config generator for Kong
 -- execute with `kong-12f {template-file} {destination-dir}`
 
@@ -17,7 +26,7 @@ local serf_service = require "kong.cli.services.serf"
 -- first arg: the ETLUA template
 -- second arg: the buildpack/app directory
 local template_filename = arg[1]
-local config_filename   = arg[2].."/config/kong.yml"
+local config_filename   = arg[2].."/"..rel_config_file
 local cert_filename     = arg[2].."/config/cassandra.cert"
 
 -- not an `*.sh` file, because the Dyno manager should not exec
@@ -29,12 +38,14 @@ local expose_service    = os.getenv("KONG_EXPOSE") -- `proxy` (default), `admin`
 
 local cluster_secret    = os.getenv("KONG_CLUSTER_SECRET")
 if not cluster_secret then
-  error("Configuration failed: requires `KONG_CLUSTER_SECRET` environment variable; create with `serf keygen`.")
+  print("Configuration failed: requires `KONG_CLUSTER_SECRET` environment variable; create with `serf keygen`.")
+  eager_fail()
 end
 local cluster_port      = os.getenv("KONG_CLUSTER_PRIVATE_PORT") or 7946
 local cluster_address   = os.getenv("KONG_CLUSTER_PRIVATE_IP")
 if not cluster_address then
-  error("Configuration failed: requires `KONG_CLUSTER_PRIVATE_IP` environment variable.")
+  print("Configuration failed: requires `KONG_CLUSTER_PRIVATE_IP` environment variable.")
+  eager_fail()
 end
 local cluster_listen    = cluster_address..":"..cluster_port
 
@@ -75,7 +86,8 @@ elseif os.getenv("CASSANDRA_URL") ~= nil then
   end
   cassandra_cert        = os.getenv("CASSANDRA_TRUSTED_CERT") 
 else
-  error("Configuration failed: requires `CASSANDRA_URL` or `IC_CONTACT_POINTS` environment variable.")
+  print("Configuration failed: requires `CASSANDRA_URL` or `IC_CONTACT_POINTS` environment variable.")
+  eager_fail()
 end
 
 -- Prefer replication factor of three or less (then, the number of hosts)
@@ -159,7 +171,8 @@ config_file:close()
 local configuration, configuration_path = config_loader.load_default(config_filename)
 local prepared_services, err = services.prepare_all(configuration, configuration_path)
 if err then
-  error('Preparation of Kong services failed: '..err)
+  print('Error preparing Kong services: '..err)
+  eager_fail()
 end
 
 -- print("Kong configuration "..S.block(configuration))
@@ -189,3 +202,4 @@ env_file:write("export SERF_EVENT_HANDLER=".."member-join,member-leave,member-fa
 -- print(".profile.d/kong-env.sh: \n"..env_file:read("*a"))
 
 env_file:close()
+print("Configured Kong environment: KONG_CONF="..rel_config_file)
