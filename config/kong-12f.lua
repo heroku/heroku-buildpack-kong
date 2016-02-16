@@ -13,11 +13,12 @@ local serf_service = require "kong.cli.services.serf"
 -- exit success so that the dyno will start-up anyway
 local function eager_fail()
   print('')
-  print('Failed to configure Kong environment')
+  print('Could not complete configuration. See error output, above.')
   os.exit()
 end
 
 local rel_config_file = "config/kong.yml"
+local rel_env_file    = ".profile.d/kong-env"
 
 -- 12-factor config generator for Kong
 -- execute with `kong-12f {template-file} {destination-dir}`
@@ -30,7 +31,7 @@ local config_filename   = arg[2].."/"..rel_config_file
 local cert_filename     = arg[2].."/config/cassandra.cert"
 
 -- not an `*.sh` file, because the Dyno manager should not exec
-local env_filename  = arg[2].."/.profile.d/kong-env"
+local env_filename  = arg[2].."/"..rel_env_file
 
 -- Read environment variables for runtime config
 local assigned_port     = os.getenv("PORT") or 8000
@@ -166,6 +167,8 @@ config_file = io.open(config_filename, "w")
 config_file:write(config)
 config_file:close()
 
+print("Wrote Kong config: "..rel_config_file)
+
 -- Call into kong.cli.services modules to prepare the services (nginx, dnsmasq, serf)
 
 local configuration, configuration_path = config_loader.load_default(config_filename)
@@ -202,4 +205,4 @@ env_file:write("export SERF_EVENT_HANDLER=".."member-join,member-leave,member-fa
 -- print(".profile.d/kong-env.sh: \n"..env_file:read("*a"))
 
 env_file:close()
-print("Configured Kong environment: KONG_CONF="..rel_config_file)
+print("Wrote environment exports: "..rel_env_file)
