@@ -157,7 +157,10 @@ config_file:close()
 -- Call into kong.cli.services modules to prepare the services (nginx, dnsmasq, serf)
 
 local configuration, configuration_path = config_loader.load_default(config_filename)
-local prepared_services = services.prepare_all(configuration, configuration_path)
+local prepared_services, err = services.prepare_all(configuration, configuration_path)
+if err then
+  error('Preparation of Kong services failed: '..err)
+end
 
 -- print("Kong configuration "..S.block(configuration))
 -- print("Kong prepared_services "..S.block(prepared_services))
