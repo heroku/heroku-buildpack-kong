@@ -173,7 +173,7 @@ then
   tar -xf openssl-${OPENSSL_VERSION}.tar.gz
   tar -xf ngx_openresty-${OPENRESTY_VERSION}.tar.gz
   cd ngx_openresty-${OPENRESTY_VERSION}
-  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=openssl-${OPENSSL_VERSION} --with-luajit=${APP_PREFIX}
+  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION} --with-luajit=${APP_PREFIX}
   make
   make install
   cd ..
