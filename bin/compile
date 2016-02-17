@@ -25,6 +25,25 @@ BP_CACHE_DIR="$CACHE_DIR/heroku-kong-buildpack"
 mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
+# Source for Kong
+KONG_GIT_URL=https://github.com/mars/kong.git
+# commit or tag to checkout
+KONG_GIT_COMMITISH=external-supervisor
+KONG_SOURCE_DIR=${BP_CACHE_DIR}/kong-source
+
+# Set dependency versions.
+# These correspond to the archives in `vendor/`.
+# If upgrading any those archives, then update the corresponding version here.
+LUAJIT_VERSION=2.1.0-beta1
+LUAROCKS_VERSION=2.3.0
+SERF_VERSION=0.7.0
+OPENSSL_VERSION=1.0.2e
+OPENRESTY_VERSION=1.9.3.1
+# Bundled with OpenResty (not vendored separately)
+NGINX_VERSION=1.9.3
+LUANGINX_VERSION=0.9.16
+
+
 function error() {
   echo " !     $*" >&2
   exit 1
@@ -103,15 +122,6 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 # Once the installed packages are in the PATH, use them.
 
 # Build from source to have dyno-compatible path prefix
-# Set versions. Check http://openresty.org for latest version and bundled version of nginx.
-OPENSSL_VERSION=1.0.2e
-OPENRESTY_VERSION=1.9.3.1
-NGINX_VERSION=1.9.3
-LUANGINX_VERSION=0.9.16
-LUA_VERSION=5.1.5
-LUAROCKS_VERSION=2.2.2
-KONG_VERSION=0.5.4
-KONG_ROCK_VERSION=${KONG_VERSION}-1
 
 # Cache the build
 VENDOR_CACHE_DIR=${BP_CACHE_DIR}/vendor
@@ -160,6 +170,14 @@ then
   mv ${VENDOR_DIR} ${VENDOR_CACHE_DIR}
   cd ${VENDOR_CACHE_DIR}
 
+  topic "Building LuaJIT"
+  tar -xf LuaJIT-${LUAJIT_VERSION}.tar.gz
+  cd LuaJIT-${LUAJIT_VERSION}
+  make PREFIX=${APP_PREFIX}
+  make install PREFIX=${APP_PREFIX}
+  ln -sf luajit-${LUAJIT_VERSION} ${APP_PREFIX}/bin/luajit
+  cd ..
+
   topic "Building OpenResty"
   # Build refs:
   # https://github.com/openresty/lua-nginx-module/issues/331#issuecomment-77279170
@@ -178,46 +196,55 @@ then
 
   # Now we can build OpenResty / Nginx.
   cd ${OPENRESTY_DIR}
-  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${OPENSSL_DIR}
+  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${OPENSSL_DIR} --with-luajit=${APP_PREFIX}
   make
   make install
   cd ..
 
-  topic "Building Lua"
-  tar -xf lua-${LUA_VERSION}.tar.gz
-  cp lua-Makefile lua-${LUA_VERSION}/Makefile
-  cd lua-${LUA_VERSION}
-  export LUA_PREFIX=$APP_PREFIX
-  make
-  make install
-  cd ..
 
   topic "Building LuaRocks"
   tar -xf luarocks-${LUAROCKS_VERSION}.tar.gz
   cd luarocks-${LUAROCKS_VERSION}
-  ./configure --prefix=$APP_PREFIX
+  ./configure --prefix=${APP_PREFIX} --lua-suffix=jit --with-lua=${APP_PREFIX} --with-lua-include=${APP_PREFIX}/include/luajit-2.1
   make build
   make install
   cd ..  
 
-  topic "Building Kong"
-  tar -xf kong-${KONG_VERSION}.tar.gz
-  cd kong-${KONG_VERSION}
-  luarocks build --pack-binary-rock ./kong-${KONG_ROCK_VERSION}.rockspec
-  luarocks install kong-${KONG_ROCK_VERSION}.all.rock
-  cd ..
+  topic "Installing Serf"
+  unzip serf_${SERF_VERSION}_linux_amd64.zip
+  mv serf $APP_PREFIX/bin/
 
   topic "Caching build"
   mkdir -p $PREFIX_CACHE_DIR
-  cp -R $APP_PREFIX/* $PREFIX_CACHE_DIR/
+  cp -Rf $APP_PREFIX/* $PREFIX_CACHE_DIR/
 
 else
   error "Error detecting cached build: diff exited ${DIFF_STATUS}"
 fi
 
+topic "Building Kong from ${KONG_GIT_URL}#${KONG_GIT_COMMITISH}"
+# Ensure we don't have Kong from a previous build
+luarocks remove kong || true
+if [ -d "$KONG_SOURCE_DIR" ]
+then
+  cd $KONG_SOURCE_DIR
+  git fetch
+  git reset --hard origin/$KONG_GIT_COMMITISH
+else
+  git clone $KONG_GIT_URL $KONG_SOURCE_DIR
+  cd $KONG_SOURCE_DIR
+  git checkout $KONG_GIT_COMMITISH
+fi
+# Install Kong itself from the cloned git repo
+luarocks make ./kong-*.rockspec
+# Install Kong's dependencies via LuaRocks
+# (`--local` is required for this to do anything)
+luarocks install --only-deps --local ./kong-*.rockspec
+
 topic "Installing Lua rocks for kong-12f"
-luarocks install etlua 1.2.0-1
-luarocks install moses 1.4.0-1
+luarocks install etlua 1.2.0
+luarocks install moses 1.4.0
+luarocks install serpent
 
 topic "Installing Lua rocks specified in .luarocks"
 cd ${BUILD_DIR}
@@ -225,8 +252,8 @@ ${BP_DIR}/bin/install-luarocks
 
 topic "Enabling Kong 12-factor config"
 cd ${BP_DIR}
-mkdir -p $APP_PREFIX/bin
-mv kong-12f $APP_PREFIX/bin/
+mkdir -p $BUILD_DIR/.profile.d
+mv .profile.d/* $BUILD_DIR/.profile.d
 mkdir -p $BUILD_DIR/config
 mv config/* $BUILD_DIR/config
 
