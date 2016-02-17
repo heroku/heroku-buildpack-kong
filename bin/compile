@@ -229,7 +229,8 @@ if [ -d "$KONG_SOURCE_DIR" ]
 then
   cd $KONG_SOURCE_DIR
   git fetch
-  git reset --hard origin/$KONG_GIT_COMMITISH
+  git fetch --tags
+  git reset --hard $KONG_GIT_COMMITISH
 else
   git clone $KONG_GIT_URL $KONG_SOURCE_DIR
   cd $KONG_SOURCE_DIR
