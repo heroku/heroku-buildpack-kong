@@ -1,43 +1,38 @@
 Heroku Buildpack for [Kong](https://getkong.org)
 =========================
-
-As of [Kong version 0.6.0](http://blog.mashape.com/kong-0-6-0-released/), it can only be run within a [Heroku Private Space](https://www.heroku.com/private-spaces), because the new clustering behavior requires private dyno-to-dyno networking.
-
-Configuration
--------------
-
-* Buildtime 
-  * sources in the buildpack's [`vendor/`](vendor) used by [`bin/compile`](bin/compile)
-  * additional system packages in the buildpack's [`apt-packages`](apt-packages)
-  * Lua rocks: specify in the app's `.luarocks` file; each line is `{NAME} {VERSION}`
-* Runtime
-  * config template in `config/kong.yml.etlua`
-    * buildpack detects this file in the app
-    * [sample config file](config/kong.yml.etlua.sample)
-* [Kong/Nginx plugins](https://getkong.org/docs/0.5.x/plugin-development/) & other Lua modules
-  * Lua source in the app
-    * [Kong plugins](https://getkong.org/docs/0.5.x/plugin-development/):
-      * `lib/kong/plugins/{NAME}`
-      * See: [Plugin File Structure](https://getkong.org/docs/0.5.x/plugin-development/file-structure/)
-    * Other Lua modules:
-      * `lib/{NAME}.lua` or
-      * `lib/{NAME}/init.lua`
-  * Add each Kong plugin name to the `plugins_available` list in `config/kong.yml.etlua` 
+Based on [Kong version 0.6.1](http://blog.mashape.com/kong-0-6-0-released/) patched for compatibility with Heroku.
 
 Usage
 -----
-To use this buildpack for an app, `config/kong.yml.etlua` must exist. Copy it from [this repo](config/kong.yml.etlua), or clone the [heroku-kong app](https://github.com/heroku/heroku-kong).
+
+### Beginner
+
+Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get started.
+
+### Expert
+
+* `kong.yml`
+  * config template in `config/kong.yml.etlua`
+    * buildpack detects this file in the app
+    * [sample config file](config/kong.yml.etlua.sample)
+* Lua source in the app
+  * [Kong plugins](https://getkong.org/docs/0.6.x/plugin-development/):
+    * `lib/kong/plugins/{NAME}`
+    * Add each Kong plugin name to the `plugins_available` list in `config/kong.yml.etlua` 
+    * See: [Plugin File Structure](https://getkong.org/docs/0.6.x/plugin-development/file-structure/)
+  * Lua rocks
+    * specify in the app's `.luarocks` file
+    * each line is `{NAME} {VERSION}`
+  * Other Lua source modules
+    * `lib/{NAME}.lua` or
+    * `lib/{NAME}/init.lua`
 
 ### Environment variables
 
-  * Port exposed on the app/dyno
-    * `PORT`
-    * Listener assigned to the port:
-      * `KONG_EXPOSE=proxy` for the gateway (default)
-      * `KONG_EXPOSE=admin` for the Admin API
-  * Kong cluster symmetric encryption
-    * `KONG_CLUSTER_SECRET`
-    * Create with `serf keygen`
+  * `PORT` exposed on the app/dyno
+    * set automatically by the Heroku dyno manager
+  * `KONG_CLUSTER_SECRET` symmetric encryption key
+    * generate value with command `serf keygen`; requires [Serf](https://www.serfdom.io/downloads.html)
   * Cassandra datastore
     * Heroku-style config vars
       * `CASSANDRA_URL`
@@ -64,8 +59,6 @@ We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with
 OpenResty is patched according to Kong's [compile from source docs](https://getkong.org/install/source/).
 
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source, as the versions included in the Cedar 14 stack & apt packages for Ubuntu/Trusty are too old.
-
-Kong source is vendored and installed via `luarocks`, because LuaRocks does not reliably provide `kong`. (Was the 0.5.4 version yanked?)
 
 
 Modification
