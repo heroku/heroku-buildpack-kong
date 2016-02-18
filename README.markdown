@@ -36,9 +36,12 @@ Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get start
   * Cassandra datastore
     * Heroku-style config vars
       * `CASSANDRA_URL`
+         
         ```
 cassandra://username:password@x.x.x.x:port/keyspace,cassandra://username:password@y.y.y.y:port/keyspace
-        ```
+        ```  
+        
+          `username:password` must be the same for all instances.
       * `CASSANDRA_TRUSTED_CERT` (SSL is disabled unless provided)
     * [Instaclustr add-on](https://elements.heroku.com/addons/instaclustr) config vars
       * `IC_CONTACT_POINTS`
