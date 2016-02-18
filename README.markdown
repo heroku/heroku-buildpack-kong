@@ -1,4 +1,4 @@
-Heroku Buildpack for [Kong](https://getkong.org)
+[Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org)
 =========================
 Based on [Kong version 0.6.1](http://blog.mashape.com/kong-0-6-0-released/) patched for compatibility with Heroku.
 
@@ -62,6 +62,8 @@ We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with
 OpenResty is patched according to Kong's [compile from source docs](https://getkong.org/install/source/).
 
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source, as the versions included in the Cedar 14 stack & apt packages for Ubuntu/Trusty are too old.
+
+Kong is installed from a forked source repo that includes [minimal changes for compatibility with the Heroku runtime](https://github.com/Mashape/kong/compare/release/0.6.1...mars:0.6.1-external-supervisor).
 
 
 Modification
