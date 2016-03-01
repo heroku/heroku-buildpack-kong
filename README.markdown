@@ -1,6 +1,6 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org)
 =========================
-Based on [Kong version 0.6.1](http://blog.mashape.com/kong-0-6-0-released/) patched for compatibility with Heroku.
+Based on [Kong version 0.7.0](http://blog.mashape.com/kong-0-7-0-released/) patched for compatibility with Heroku.
 
 Usage
 -----
@@ -16,10 +16,10 @@ Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get start
     * buildpack detects this file in the app
     * [sample config file](config/kong.yml.etlua.sample)
 * Lua source in the app
-  * [Kong plugins](https://getkong.org/docs/0.6.x/plugin-development/):
+  * [Kong plugins](https://getkong.org/docs/0.7.x/plugin-development/):
     * `lib/kong/plugins/{NAME}`
     * Add each Kong plugin name to the `plugins_available` list in `config/kong.yml.etlua` 
-    * See: [Plugin File Structure](https://getkong.org/docs/0.6.x/plugin-development/file-structure/)
+    * See: [Plugin File Structure](https://getkong.org/docs/0.7.x/plugin-development/file-structure/)
   * Lua rocks
     * specify in the app's `.luarocks` file
     * each line is `{NAME} {VERSION}`
@@ -59,11 +59,9 @@ The first time this buildpack builds an app, the build time will be significantl
 
 We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with a writable `/app/.heroku` prefix. Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local` which is read-only in a dyno.
 
-OpenResty is patched according to Kong's [compile from source docs](https://getkong.org/install/source/).
-
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source, as the versions included in the Cedar 14 stack & apt packages for Ubuntu/Trusty are too old.
 
-Kong is installed from a forked source repo that includes [minimal changes for compatibility with the Heroku runtime](https://github.com/Mashape/kong/compare/release/0.6.1...mars:0.6.1-external-supervisor).
+Kong is installed from a forked source repo that includes [minimal changes for compatibility with the Heroku runtime](https://github.com/Mashape/kong/compare/release/0.7.0...mars:0.7.0-external-supervisor).
 
 
 Modification
