@@ -28,7 +28,7 @@ PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 # Source for Kong
 KONG_GIT_URL=https://github.com/mars/kong.git
 # commit or tag to checkout
-KONG_GIT_COMMITISH=0.6.1-external-supervisor.1
+KONG_GIT_COMMITISH=0.7.0-external-supervisor.1
 KONG_SOURCE_DIR=${BP_CACHE_DIR}/kong-source
 
 # Set dependency versions.
