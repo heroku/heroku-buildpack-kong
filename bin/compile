@@ -13,6 +13,7 @@ set -u
 # parse and derive params
 BUILD_DIR=$1
 CACHE_DIR=$2
+ENV_DIR=$3
 BP_DIR=`cd $(dirname $0); cd ..; pwd`
 VENDOR_DIR=${BP_DIR}/vendor
 
@@ -26,10 +27,21 @@ mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
 # Source for Kong
-KONG_GIT_URL=https://github.com/mars/kong.git
+if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
+then
+  KONG_GIT_URL=`cat ${ENV_DIR}/KONG_GIT_URL`
+else
+  KONG_GIT_URL="https://github.com/mars/kong.git"
+fi
 # commit or tag to checkout
-KONG_GIT_COMMITISH=0.7.0-external-supervisor.1
-KONG_SOURCE_DIR=${BP_CACHE_DIR}/kong-source
+if [ -f "${ENV_DIR}/KONG_GIT_COMMITISH" ]
+then
+  KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
+else
+  KONG_GIT_COMMITISH="0.7.0-external-supervisor.1"
+fi
+
+KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 
 # Set dependency versions.
 # These correspond to the archives in `vendor/`.

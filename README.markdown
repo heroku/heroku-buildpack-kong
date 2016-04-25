@@ -33,6 +33,10 @@ Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get start
     * set automatically by the Heroku dyno manager
   * `KONG_CLUSTER_SECRET` symmetric encryption key
     * generate value with command `serf keygen`; requires [Serf](https://www.serfdom.io/downloads.html)
+  * `KONG_GIT_URL` git repo URL for Kong source
+    * example `https://github.com/mars/kong.git`
+  * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
+    * example `0.7.0-external-supervisor.1` or `master`
   * Cassandra datastore
     * Heroku-style config vars
       * `CASSANDRA_URL`
