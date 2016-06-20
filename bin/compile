@@ -219,7 +219,7 @@ then
   cd $KONG_SOURCE_DIR
   git fetch
   git fetch --tags
-  git reset --hard $(git rev-list -n 1 origin/$KONG_GIT_COMMITISH)
+  git reset --hard $(git rev-list -n 1 $KONG_GIT_COMMITISH)
 else
   git clone $KONG_GIT_URL $KONG_SOURCE_DIR
   cd $KONG_SOURCE_DIR
