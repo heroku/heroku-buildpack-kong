@@ -1,6 +1,6 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org)
 =========================
-Based on [Kong version 0.7.0](http://blog.mashape.com/kong-0-7-0-released/) patched for compatibility with Heroku.
+Based on [Kong version 0.8.3](http://blog.mashape.com/kong-0-8-3-released/) patched for compatibility with Heroku.
 
 Usage
 -----
@@ -16,10 +16,10 @@ Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get start
     * buildpack detects this file in the app
     * [sample config file](config/kong.yml.etlua.sample)
 * Lua source in the app
-  * [Kong plugins](https://getkong.org/docs/0.7.x/plugin-development/):
+  * [Kong plugins](https://getkong.org/docs/0.8.x/plugin-development/):
     * `lib/kong/plugins/{NAME}`
     * Add each Kong plugin name to the `plugins_available` list in `config/kong.yml.etlua` 
-    * See: [Plugin File Structure](https://getkong.org/docs/0.7.x/plugin-development/file-structure/)
+    * See: [Plugin File Structure](https://getkong.org/docs/0.8.x/plugin-development/file-structure/)
   * Lua rocks
     * specify in the app's `.luarocks` file
     * each line is `{NAME} {VERSION}`
@@ -34,9 +34,9 @@ Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get start
   * `KONG_CLUSTER_SECRET` symmetric encryption key
     * generate value with command `serf keygen`; requires [Serf](https://www.serfdom.io/downloads.html)
   * `KONG_GIT_URL` git repo URL for Kong source
-    * example `https://github.com/mars/kong.git`
+    * example `https://github.com/heroku/kong.git`
   * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-    * example `0.7.0-external-supervisor.1` or `master`
+    * example `0.8.3-external-supervisor.1` or `master`
   * Cassandra datastore
     * Heroku-style config vars
       * `CASSANDRA_URL`
@@ -56,6 +56,13 @@ x.x.x.x,y.y.y.y
       * `IC_USER`
       * `IC_PASSWORD`
       * `IC_CERTIFICATE` (SSL is disabled unless provided)
+  * Postgres datastore
+    * Heroku-style config vars
+      * `DATABASE_URL`
+
+        ```
+postgres://username:password@hostname:post/database
+        ```  
 
 Background
 ----------
@@ -65,7 +72,7 @@ We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with
 
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source, as the versions included in the Cedar 14 stack & apt packages for Ubuntu/Trusty are too old.
 
-Kong is installed from a forked source repo that includes [minimal changes for compatibility with the Heroku runtime](https://github.com/Mashape/kong/compare/release/0.7.0...mars:0.7.0-external-supervisor).
+Kong is installed from a forked source repo that includes [minimal changes for compatibility with the Heroku runtime](https://github.com/Mashape/kong/compare/release/0.8.3...heroku:0.8.3-external-supervisor).
 
 
 Modification

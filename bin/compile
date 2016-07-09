@@ -31,14 +31,14 @@ if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
 then
   KONG_GIT_URL=`cat ${ENV_DIR}/KONG_GIT_URL`
 else
-  KONG_GIT_URL="https://github.com/mars/kong.git"
+  KONG_GIT_URL="https://github.com/heroku/kong.git"
 fi
 # commit or tag to checkout
 if [ -f "${ENV_DIR}/KONG_GIT_COMMITISH" ]
 then
   KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
 else
-  KONG_GIT_COMMITISH="0.7.0-external-supervisor.1"
+  KONG_GIT_COMMITISH="0.8.3-external-supervisor.1"
 fi
 
 KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
@@ -51,6 +51,7 @@ LUAROCKS_VERSION=2.3.0
 SERF_VERSION=0.7.0
 OPENSSL_VERSION=1.0.2f
 OPENRESTY_VERSION=1.9.7.2
+PGMOON_VERSION=1.4.0-1
 
 function error() {
   echo " !     $*" >&2
@@ -225,10 +226,13 @@ else
   cd $KONG_SOURCE_DIR
   git checkout $KONG_GIT_COMMITISH
 fi
+# Install pgmoon from src.rock
+luarocks build ${VENDOR_CACHE_DIR}/pgmoon-${PGMOON_VERSION}.src.rock
 # Install Kong itself from the cloned git repo
 luarocks make ./kong-*.rockspec
 # Install Kong's dependencies via LuaRocks
 # (`--local` is required for this to do anything)
+luarocks install --local ${VENDOR_CACHE_DIR}/pgmoon-${PGMOON_VERSION}.src.rock
 luarocks install --only-deps --local ./kong-*.rockspec
 
 topic "Installing Lua rocks for kong-12f"
