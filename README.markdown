@@ -2,6 +2,10 @@
 =========================
 Based on [Kong version 0.7.0](http://blog.mashape.com/kong-0-7-0-released/) patched for compatibility with Heroku.
 
+
+🚨 **This Heroku buildpack is no longer in development. It uses an outdated version of Kong.** It remains here on Github only to support existing deployments.
+
+
 Usage
 -----
 
