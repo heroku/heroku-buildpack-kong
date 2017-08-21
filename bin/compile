@@ -31,26 +31,25 @@ if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
 then
   KONG_GIT_URL=`cat ${ENV_DIR}/KONG_GIT_URL`
 else
-  KONG_GIT_URL="https://github.com/mars/kong.git"
+  KONG_GIT_URL="https://github.com/Mashape/kong.git"
 fi
 # commit or tag to checkout
 if [ -f "${ENV_DIR}/KONG_GIT_COMMITISH" ]
 then
   KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
 else
-  KONG_GIT_COMMITISH="0.7.0-external-supervisor.1"
+  KONG_GIT_COMMITISH="0.11.0"
 fi
 
 KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 
+
 # Set dependency versions.
 # These correspond to the archives in `vendor/`.
 # If upgrading any those archives, then update the corresponding version here.
-LUAJIT_VERSION=2.1.0-beta1
-LUAROCKS_VERSION=2.3.0
-SERF_VERSION=0.7.0
-OPENSSL_VERSION=1.0.2f
-OPENRESTY_VERSION=1.9.7.2
+LUAROCKS_VERSION=2.4.2
+OPENSSL_VERSION=1.0.2l
+OPENRESTY_VERSION=1.11.2.4
 
 function error() {
   echo " !     $*" >&2
@@ -80,7 +79,7 @@ APT_OPTIONS="-o debug::nolocking=true -o dir::cache=$APT_CACHE_DIR -o dir::state
 topic "Updating apt caches"
 apt-get $APT_OPTIONS update | indent
 
-for PACKAGE in $(cat apt-packages); do
+for PACKAGE in $(cat Aptfile); do
   if [[ $PACKAGE == *deb ]]; then
     PACKAGE_NAME=$(basename $PACKAGE .deb)
     PACKAGE_FILE=$APT_CACHE_DIR/archives/$PACKAGE_NAME.deb
@@ -103,7 +102,7 @@ done
 topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/000_apt.sh
-export PATH="\$HOME/.heroku/bin:\$HOME/.heroku/nginx/sbin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
+export PATH="\$HOME/.heroku/nginx/sbin:\$HOME/.heroku/luajit/bin:\$HOME/.heroku/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
 export LD_LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
 export LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
 export INCLUDE_PATH="\$HOME/.heroku/include:\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
@@ -114,7 +113,7 @@ export LUA_PATH="\$HOME/lib/?.lua;\$HOME/lib/?/init.lua;\$HOME/.luarocks/share/l
 export LUA_CPATH="\$HOME/lib/?.so;\$HOME/.luarocks/lib/lua/5.1/?.so;\$HOME/.heroku/lib/lua/5.1/?.so;./?.so"
 EOF
 
-export PATH="$APP_PREFIX/bin:$APP_PREFIX/nginx/sbin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
+export PATH="$APP_PREFIX/nginx/sbin:$APP_PREFIX/luajit/bin:$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
 export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
 export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
 export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include"
@@ -173,19 +172,19 @@ then
   mv ${VENDOR_DIR} ${VENDOR_CACHE_DIR}
   cd ${VENDOR_CACHE_DIR}
 
-  topic "Building LuaJIT"
-  tar -xf LuaJIT-${LUAJIT_VERSION}.tar.gz
-  cd LuaJIT-${LUAJIT_VERSION}
-  make PREFIX=${APP_PREFIX}
-  make install PREFIX=${APP_PREFIX}
-  ln -sf luajit-${LUAJIT_VERSION} ${APP_PREFIX}/bin/luajit
+  topic "Building OpenSSL"
+  tar -xf openssl-${OPENSSL_VERSION}.tar.gz
+  cd openssl-${OPENSSL_VERSION}
+  ./config --prefix=$APP_PREFIX -fPIC
+  make
+  make install
   cd ..
 
   topic "Building OpenResty"
   tar -xf openssl-${OPENSSL_VERSION}.tar.gz
-  tar -xf ngx_openresty-${OPENRESTY_VERSION}.tar.gz
-  cd ngx_openresty-${OPENRESTY_VERSION}
-  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION} --with-luajit=${APP_PREFIX}
+  tar -xf openresty-${OPENRESTY_VERSION}.tar.gz
+  cd openresty-${OPENRESTY_VERSION}
+  ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
   make
   make install
   cd ..
@@ -194,14 +193,11 @@ then
   topic "Building LuaRocks"
   tar -xf luarocks-${LUAROCKS_VERSION}.tar.gz
   cd luarocks-${LUAROCKS_VERSION}
-  ./configure --prefix=${APP_PREFIX} --lua-suffix=jit --with-lua=${APP_PREFIX} --with-lua-include=${APP_PREFIX}/include/luajit-2.1
+  ./configure --prefix=${APP_PREFIX} --lua-suffix=jit --with-lua=${APP_PREFIX}/luajit --with-lua-include=${APP_PREFIX}/luajit/include/luajit-2.1
   make build
   make install
   cd ..  
 
-  topic "Installing Serf"
-  unzip serf_${SERF_VERSION}_linux_amd64.zip
-  mv serf $APP_PREFIX/bin/
 
   topic "Caching build"
   mkdir -p $PREFIX_CACHE_DIR
@@ -225,16 +221,17 @@ else
   cd $KONG_SOURCE_DIR
   git checkout $KONG_GIT_COMMITISH
 fi
+export OPENSSL_DIR=${APP_PREFIX}
 # Install Kong itself from the cloned git repo
 luarocks make ./kong-*.rockspec
 # Install Kong's dependencies via LuaRocks
 # (`--local` is required for this to do anything)
-luarocks install --only-deps --local ./kong-*.rockspec
+luarocks install --local ./kong-*.rockspec
+mv bin/* ${APP_PREFIX}/bin/
 
 topic "Installing Lua rocks for kong-12f"
-luarocks install etlua 1.2.0
-luarocks install moses 1.4.0
-luarocks install serpent
+luarocks install etlua 1.3.0
+luarocks install luasocket
 
 topic "Installing Lua rocks specified in .luarocks"
 cd ${BUILD_DIR}
@@ -246,9 +243,6 @@ mkdir -p $BUILD_DIR/.profile.d
 mv .profile.d/* $BUILD_DIR/.profile.d
 mkdir -p $BUILD_DIR/config
 mv config/* $BUILD_DIR/config
-
-topic "Creating NginX working directory"
-mkdir -p $BUILD_DIR/nginx-working
 
 topic "Making build artifacts available to app"
 mv $APP_PREFIX $BUILD_DIR/.heroku
