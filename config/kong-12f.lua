@@ -19,7 +19,7 @@ local env_filename  = arg[2].."/"..rel_env_file
 
 -- Read environment variables for runtime config
 local address           = "0.0.0.0"
-local port              = os.getenv("PORT") or 8000)
+local port              = os.getenv("PORT") or 8000
 local expose_service    = os.getenv("KONG_EXPOSE") -- `proxy` (default), `admin`, `adminssl`, `proxyssl`
 local pg_url            = os.getenv("DATABASE_URL") or "postgres://localhost:5432/kong"
 
