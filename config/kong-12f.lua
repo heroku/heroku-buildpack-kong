@@ -17,9 +17,14 @@ local config_filename   = arg[2].."/"..rel_config_file
 -- not an `*.sh` file, because the Dyno manager should not exec
 local env_filename  = arg[2].."/"..rel_env_file
 
--- Read environment variables for runtime config
 local address           = "0.0.0.0"
-local port              = os.getenv("PORT") or 8000
+local default_proxy_port      = 8000
+local default_proxy_port_ssl  = 8443
+local default_admin_port      = 8001
+local default_admin_port_ssl  = 8444
+
+-- Read environment variables for runtime config
+local port              = os.getenv("PORT") or default_proxy_port
 local expose_service    = os.getenv("KONG_EXPOSE") -- `proxy` (default), `admin`, `adminssl`, `proxyssl`
 local pg_url            = os.getenv("DATABASE_URL") or "postgres://localhost:5432/kong"
 
@@ -38,28 +43,28 @@ local admin_listen
 local admin_listen_ssl
 if expose_service == "admin" then
   print("Configuring as Kong admin API")
-  proxy_listen     = address..":"..(port - 2)
-  proxy_listen_ssl = address..":"..(port - 1)
-  admin_listen     = address..":"..(port)
-  admin_listen_ssl = address..":"..(port + 1)
+  proxy_listen     = address..":"..default_proxy_port
+  proxy_listen_ssl = address..":"..default_proxy_port_ssl
+  admin_listen     = address..":"..port
+  admin_listen_ssl = address..":"..default_admin_port_ssl
 elseif expose_service == "adminssl" then
   print("Configuring as Kong admin SSL API")
-  proxy_listen     = address..":"..(port - 3)
-  proxy_listen_ssl = address..":"..(port - 2)
-  admin_listen     = address..":"..(port - 1)
-  admin_listen_ssl = address..":"..(port)
+  proxy_listen     = address..":"..default_proxy_port
+  proxy_listen_ssl = address..":"..default_proxy_port_ssl
+  admin_listen     = address..":"..default_admin_port
+  admin_listen_ssl = address..":"..port
 elseif expose_service == "proxyssl" then
   print("Configuring as Kong SSL proxy")
-  proxy_listen     = address..":"..(port - 1)
-  proxy_listen_ssl = address..":"..(port)
-  admin_listen     = address..":"..(port + 1)
-  admin_listen_ssl = address..":"..(port + 2)
+  proxy_listen     = address..":"..default_proxy_port
+  proxy_listen_ssl = address..":"..port
+  admin_listen     = address..":"..default_admin_port
+  admin_listen_ssl = address..":"..default_admin_port_ssl
 else
   print("Configuring as Kong proxy")
-  proxy_listen     = address..":"..(port)
-  proxy_listen_ssl = address..":"..(port + 1)
-  admin_listen     = address..":"..(port + 2)
-  admin_listen_ssl = address..":"..(port + 3)
+  proxy_listen     = address..":"..port
+  proxy_listen_ssl = address..":"..default_proxy_port_ssl
+  admin_listen     = address..":"..default_admin_port
+  admin_listen_ssl = address..":"..default_admin_port_ssl
 end
 
 -- Render the Kong configuration file
@@ -105,8 +110,8 @@ env_file:write("export KONG_PG_USER="..pg_user.."\n")
 env_file:write("export KONG_PG_PASSWORD="..pg_password.."\n")
 env_file:write("export KONG_PG_DATABASE="..pg_database.."\n")
 
-env_file:seek("set", 0)
-print(".profile.d/kong-env: \n"..env_file:read("*a"))
+-- env_file:seek("set", 0)
+-- print(".profile.d/kong-env: \n"..env_file:read("*a"))
 
 env_file:close()
 print("Wrote environment exports: "..rel_env_file)
