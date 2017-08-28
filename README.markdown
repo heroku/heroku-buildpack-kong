@@ -59,7 +59,20 @@ git push heroku master
   * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
     * example `master`
   * `DATABASE_URL`
-    * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)
+    * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)#### Using Environment Variables in Plugins
+
+To use env vars within your own code.
+
+  1. Whitelist the variable name for use within Nginx 
+    * In a custom Nginx config file add `env MY_VARIABLE;`
+    * See: [Nginx config](#user-content-nginx-config) (below)
+  2. Access the variable in Lua plugins
+    * Use `os.getenv('MY_VARIABLE')` to retrieve the value.
+
+
+#### Nginx config
+
+Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://getkong.org/docs/0.11.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
 
 Background
 ----------

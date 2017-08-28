@@ -4,5 +4,6 @@ cat << EOF
 ---
 addons:
 default_process_types:
-  web: kong start -c config/kong.conf
+  web: bin/heroku-buildpack-kong-web
+  release: bin/heroku-buildpack-kong-release
 EOF

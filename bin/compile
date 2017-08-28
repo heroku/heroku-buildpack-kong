@@ -246,3 +246,6 @@ mv config/* $BUILD_DIR/config
 
 topic "Making build artifacts available to app"
 mv $APP_PREFIX $BUILD_DIR/.heroku
+# Move executables for Procfile into place
+mkdir -p $BUILD_DIR/bin
+cp $BP_DIR/bin/app/heroku-* $BUILD_DIR/bin/
