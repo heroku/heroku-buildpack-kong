@@ -2,8 +2,9 @@
 =========================
 Deploy [Kong 0.11.0 Community Edition](http://blog.mashape.com/kong-ce-0-11-0-released/) as a Heroku app.
 
+🌈 This buildpack now deploys genuine Mashape Kong, [built from source on Github](bin/compile#L226); patches are no longer required for compatibility with Heroku.
 
-🌈 **This buildpack now deploys the release version of Kong.** Patches are no longer required for compatibility with Heroku.
+🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
 
 
 Usage
