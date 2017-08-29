@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eu
+
+# Customized Nginx setup
+# https://getkong.org/docs/0.11.x/configuration/#customized-nginx-setup
+
+APP_PREFIX="${APP_PREFIX:-/app/.heroku}"
+KONG_CONF="${KONG_CONF:-config/kong.conf}"
+NGINX_TEMPLATE="config/nginx.template"
+NGINX_TEMPLATE_PARAM=""
+
+if [ -e "$NGINX_TEMPLATE" ]
+  then
+  NGINX_TEMPLATE_PARAM="--nginx-conf $NGINX_TEMPLATE"
+fi
+
+kong prepare -p $APP_PREFIX -c $KONG_CONF $NGINX_TEMPLATE_PARAM
+eval "nginx -p $APP_PREFIX -c $APP_PREFIX/nginx.conf $@"

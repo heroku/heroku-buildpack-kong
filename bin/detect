@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bin/detect <build-dir>
 
-if [ -f $1/config/kong.yml.etlua ]; then
+if [ -f $1/config/kong.conf.etlua ]; then
   echo "Kong" && exit 0
 else
   echo "no" && exit 1

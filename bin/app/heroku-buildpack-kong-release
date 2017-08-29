@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eu
+
+KONG_CONF="${KONG_CONF:-config/kong.conf}"
+
+kong migrations up -c $KONG_CONF $@

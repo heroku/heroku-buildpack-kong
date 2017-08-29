@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+export KONG_CONF=/app/config/kong.conf
+
 # `kong-12f.lua` appends environment variables here
