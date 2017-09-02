@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-LUAROCKS_SPEC=.luarocks
+LUAROCKS_SPEC="${LUAROCKS_SPEC:-.luarocks}"
 
 # Newline is the internal field separator
 IFS=$'\n'
