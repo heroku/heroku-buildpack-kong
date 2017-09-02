@@ -68,10 +68,10 @@ git push heroku master
 To use env vars within your own code.
 
   1. Whitelist the variable name for use within Nginx 
-    * In a custom Nginx config file add `env MY_VARIABLE;`
-    * See: [Nginx config](#user-content-nginx-config) (below)
+     * In a custom Nginx config file add `env MY_VARIABLE;`
+     * See: [Nginx config](#user-content-nginx-config) (below)
   2. Access the variable in Lua plugins
-    * Use `os.getenv('MY_VARIABLE')` to retrieve the value.
+     * Use `os.getenv('MY_VARIABLE')` to retrieve the value.
 
 
 #### Nginx config
