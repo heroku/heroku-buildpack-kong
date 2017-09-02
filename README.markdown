@@ -60,7 +60,10 @@ git push heroku master
   * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
     * example `master`
   * `DATABASE_URL`
-    * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)#### Using Environment Variables in Plugins
+    * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)
+
+
+#### Using Environment Variables in Plugins
 
 To use env vars within your own code.
 
