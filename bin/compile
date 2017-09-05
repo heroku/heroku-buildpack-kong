@@ -238,15 +238,18 @@ topic "Installing Lua rocks specified in Rockfile"
 cd ${BUILD_DIR}
 ${BP_DIR}/bin/install-luarocks
 
-topic "Enabling Kong 12-factor config"
+topic "Enabling runtime configuration & processes"
 cd ${BP_DIR}
 mkdir -p $BUILD_DIR/.profile.d
 mv .profile.d/* $BUILD_DIR/.profile.d
 mkdir -p $BUILD_DIR/config
 mv config/* $BUILD_DIR/config
-
-topic "Making build artifacts available to app"
-mv $APP_PREFIX $BUILD_DIR/.heroku
 # Move executables for Procfile into place
 mkdir -p $BUILD_DIR/bin
 cp $BP_DIR/bin/app/heroku-* $BUILD_DIR/bin/
+
+# Avoid moving build for CI, because build is in the right place already.
+if [ ! "$BUILD_DIR" = "/app" ]; then
+  topic "Making build artifacts available to app"
+  mv $APP_PREFIX $BUILD_DIR/.heroku
+fi
