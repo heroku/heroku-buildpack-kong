@@ -101,7 +101,7 @@ done
 
 topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
-cat <<EOF >$BUILD_DIR/.profile.d/000_apt.sh
+cat <<EOF >$BUILD_DIR/.profile.d/000_buildpack_kong.sh
 export PATH="\$HOME/.heroku/nginx/sbin:\$HOME/.heroku/luajit/bin:\$HOME/.heroku/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
 export LD_LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
 export LIBRARY_PATH="\$HOME/.heroku/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
