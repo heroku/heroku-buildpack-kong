@@ -229,10 +229,6 @@ luarocks make ./kong-*.rockspec
 luarocks install --local ./kong-*.rockspec
 mv bin/* ${APP_PREFIX}/bin/
 
-topic "Installing Lua rocks for kong-12f"
-luarocks install etlua 1.3.0
-luarocks install luasocket
-
 topic "Installing Lua rocks specified in .luarocks"
 cd ${BUILD_DIR}
 ${BP_DIR}/bin/install-luarocks
