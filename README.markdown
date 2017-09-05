@@ -45,7 +45,7 @@ git push heroku master
     * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua` 
     * See: [Plugin File Structure](https://getkong.org/docs/0.11.x/plugin-development/file-structure/)
   * Lua rocks
-    * specify in the app's `.luarocks` file
+    * specify in the app's `Rockfile`
     * each line is `{NAME} {VERSION}`
   * Other Lua source modules
     * `lib/{NAME}.lua` or

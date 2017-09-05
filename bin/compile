@@ -208,6 +208,11 @@ else
 fi
 
 topic "Building Kong from ${KONG_GIT_URL}#${KONG_GIT_COMMITISH}"
+# Move the unfortunately named `.luarocks` spec file so that it doesn't
+# interfere during CI. We're migrating Kong apps to use `Rockfile` instead.
+if [ -f "$BUILD_DIR/.luarocks" ]; then
+  mv "$BUILD_DIR/.luarocks" "$BUILD_DIR/Rockfile"
+fi
 # Ensure we don't have Kong from a previous build
 luarocks remove kong || true
 if [ -d "$KONG_SOURCE_DIR" ]
@@ -229,7 +234,7 @@ luarocks make ./kong-*.rockspec
 luarocks install --local ./kong-*.rockspec
 mv bin/* ${APP_PREFIX}/bin/
 
-topic "Installing Lua rocks specified in .luarocks"
+topic "Installing Lua rocks specified in Rockfile"
 cd ${BUILD_DIR}
 ${BP_DIR}/bin/install-luarocks
 

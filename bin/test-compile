@@ -19,6 +19,14 @@ BP_DIR=`cd $(dirname $0); cd ..; pwd`
 # Main compile
 eval "bin/compile $@"
 
-topic "Installing Lua rocks specified in .luarocks_test"
 cd ${BUILD_DIR}
-LUAROCKS_SPEC=.luarocks_test ${BP_DIR}/bin/install-luarocks
+
+if [ -f ".luarocks_test" ]; then
+  # Backward compat for earlier version of heroku-kong app.
+  echo "-----> Installing Lua rocks specified in .luarocks_test"
+  export LUAROCKS_SPEC=.luarocks_test
+else
+  echo "-----> Installing Lua rocks specified in Rockfile_test"
+  export LUAROCKS_SPEC=Rockfile_test
+fi
+${BP_DIR}/bin/install-luarocks
