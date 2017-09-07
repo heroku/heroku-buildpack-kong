@@ -14,7 +14,13 @@ ENV_DIR="${2:-}"
 
 # Override normal non-SSL Postgres test config.
 export KONG_PG_SSL="${KONG_PG_SSL:-on}"
+# Use test config in the app.
+export KONG_CONF="spec/kong_tests.conf"
 
-# Looks for busted in the app
 cd ${BUILD_DIR}
+
+# Initialize the database.
+kong migrations up -c $KONG_CONF
+
+# Run busted in the app.
 bin/busted
