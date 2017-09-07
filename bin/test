@@ -13,4 +13,5 @@ BUILD_DIR="${1:-}"
 ENV_DIR="${2:-}"
 
 # Looks for busted in the app
-${BUILD_DIR}/bin/busted
+cd ${BUILD_DIR}
+bin/busted
