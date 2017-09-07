@@ -12,6 +12,9 @@ set -o pipefail
 BUILD_DIR="${1:-}"
 ENV_DIR="${2:-}"
 
+# Override normal non-SSL Postgres test config.
+export KONG_PG_SSL="${KONG_PG_SSL:-on}"
+
 # Looks for busted in the app
 cd ${BUILD_DIR}
 bin/busted
