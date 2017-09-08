@@ -75,6 +75,18 @@ To use env vars within your own code.
 
 Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://getkong.org/docs/0.11.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
 
+#### Testing
+
+This buildpack supports [Heroku CI](https://devcenter.heroku.com/articles/heroku-ci) to automate test runs and integrate with deployment workflow.
+
+Tests should follow the [Kong plugin testing](https://getkong.org/docs/0.11.x/plugin-development/tests/) guide.
+
+App requirements:
+
+  * `spec/kong_tests.conf` must contain the Kong configuration for running tests
+
+See: sample [Heroku Kong app](https://github.com/heroku/heroku-kong) which contains a complete test suite.
+
 Background
 ----------
 The first time this buildpack builds an app, the build time will be significantly longer as Kong and its dependencies are compiled from source. **The compiled artifacts are cached to speed up subsequent builds.**
