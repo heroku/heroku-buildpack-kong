@@ -45,7 +45,7 @@ git push heroku master
     * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua` 
     * See: [Plugin File Structure](https://getkong.org/docs/0.11.x/plugin-development/file-structure/)
   * Lua rocks
-    * specify in the app's `.luarocks` file
+    * specify in the app's `Rockfile`
     * each line is `{NAME} {VERSION}`
   * Other Lua source modules
     * `lib/{NAME}.lua` or
@@ -77,6 +77,18 @@ To use env vars within your own code.
 #### Nginx config
 
 Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://getkong.org/docs/0.11.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
+
+#### Testing
+
+This buildpack supports [Heroku CI](https://devcenter.heroku.com/articles/heroku-ci) to automate test runs and integrate with deployment workflow.
+
+Tests should follow the [Kong plugin testing](https://getkong.org/docs/0.11.x/plugin-development/tests/) guide.
+
+App requirements:
+
+  * `spec/kong_tests.conf` must contain the Kong configuration for running tests
+
+See: sample [Heroku Kong app](https://github.com/heroku/heroku-kong) which contains a complete test suite.
 
 Background
 ----------

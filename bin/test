@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# bin/test <build-dir> <env-dir>
+
+# Fail immediately on non-zero exit code.
+set -e
+# Fail immediately on non-zero exit code within a pipeline.
+set -o pipefail
+# Debug, echo every command
+#set -x
+
+# parse and derive params
+BUILD_DIR="${1:-}"
+ENV_DIR="${2:-}"
+
+# Override normal non-SSL Postgres test config.
+export KONG_PG_SSL="${KONG_PG_SSL:-on}"
+# Use test config in the app.
+export KONG_CONF="spec/kong_tests.conf"
+
+cd ${BUILD_DIR}
+
+# Initialize the database.
+kong migrations up -c $KONG_CONF
+
+# Run tests.
+bin/heroku-buildpack-kong-busted

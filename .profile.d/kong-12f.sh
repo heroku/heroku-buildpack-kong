@@ -2,7 +2,7 @@
 
 echo "Starting Kong 12-factor config"
 
-SRC_DIR=$(pwd)
+SRC_DIR=/app
 BIN_DIR=$(cd "$(dirname "$0")"; pwd)
 
 # Get the private IP of the dyno.
