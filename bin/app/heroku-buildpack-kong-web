@@ -3,11 +3,17 @@ set -eu
 
 # Customized Nginx setup
 # https://getkong.org/docs/0.11.x/configuration/#customized-nginx-setup
-
+SRC_DIR=/app
 APP_PREFIX="${APP_PREFIX:-/app/.heroku}"
 KONG_CONF="${KONG_CONF:-config/kong.conf}"
 NGINX_TEMPLATE="config/nginx.template"
 NGINX_TEMPLATE_PARAM=""
+
+if [ -z "$1" ] && [ "$1" != "web" ] then
+  #overwrite kong.conf with specific template
+  #to expose service to private space network
+  $SRC_DIR/.profile.d/kong-12f.sh $1
+fi
 
 if [ -e "$NGINX_TEMPLATE" ]
   then
