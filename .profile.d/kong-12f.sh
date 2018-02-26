@@ -19,7 +19,7 @@ echo "Kong cluster private IP: $KONG_CLUSTER_PRIVATE_IP"
 # Specify template to use for non-web processes or use default.
 # For use with exposing to private space network
 PROC=$(echo $DYNO | cut -f1 -d".")
-if ! [ -z "$1" ] && [ -f "$SRC_DIR/config/$PROC-kong.conf.etlua" ]
+if [ -f "$SRC_DIR/config/$PROC-kong.conf.etlua" ]
 then
   template_filename="$PROC-kong.conf.etlua"
 else
