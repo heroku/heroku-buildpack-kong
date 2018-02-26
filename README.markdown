@@ -55,7 +55,7 @@ git push heroku master
 
   * `PORT` exposed on the app/dyno
     * set automatically by the Heroku dyno manager
-  * `<CUSTOM>_PORT` if you'd like specify a custom port per process type for the instance to listen on,
+  * `<CUSTOM>_PORT` if you'd like to specify a custom port per process type for the instance to listen on,
     (useful for exposing to private spaces network) then you can set an env
     var the the name of the process prepended to `_PORT` like so:
 
@@ -104,6 +104,10 @@ To use env vars within your own code.
   2. Access the variable in Lua plugins
      * Use `os.getenv('MY_VARIABLE')` to retrieve the value.
 
+#### Kong config
+
+To customize your `kong.conf`, create `config/kong.conf.etlua` based on the [sample config file](config/kong.conf.etlua.sample) in your project. By default, this buildpack will use this file as a template for the final kong.conf file. If you need to specify a separate template per process type, simply create
+`config/<process name>-kong.conf.etlua` where process name is that of the corresponding process in the Procfile. The latter use case is mostly for private space users.
 
 #### Nginx config
 
