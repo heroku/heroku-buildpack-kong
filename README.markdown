@@ -19,11 +19,12 @@ Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get start
 Create a new git repo and Heroku app:
 
 ```bash
-mkdir my-kong-app
-cd my-kong-app
+APP_NAME=my-kong-gateway # name this something unique for your app
+mkdir $APP_NAME
+cd $APP_NAME
 git init
 heroku create $APP_NAME
-heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong
+heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git
 heroku addons:create heroku-postgresql:hobby-dev
 ```
 
