@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # bin/detect <build-dir>
 
+>&2 echo '🔶 pwd'
+>&2 pwd
+>&2 echo '🔶 ls -al $1'
+>&2 ls -al $1
+>&2 echo '🔶 ls -al $2'
+>&2 ls -al $2
+
 if [ -f $1/config/kong.conf.etlua ]; then
   echo 'Kong'
   exit 0
