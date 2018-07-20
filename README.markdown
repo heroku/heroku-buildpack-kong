@@ -32,6 +32,10 @@ Create the file `config/kong.conf.etlua` based on the [sample config file](confi
 
 ```bash
 git add config/kong.conf.etlua
+
+echo '# Kong Proxy' > README.md
+git add README.md
+
 git commit -m '🐒'
 git push heroku master
 ```
