@@ -11,22 +11,26 @@ local rel_env_file    = ".profile.d/kong-env"
 -- Use shell command arguments to set file locations
 -- first arg: the ETLUA template
 -- second arg: the buildpack/app directory
+-- third arg: this will be used as a prefix
+-- to dynamically create specific
+-- env var names to retrieve values specific to
+-- non-web processes in a private space (optional)
 local template_filename = arg[1]
 local config_filename   = arg[2].."/"..rel_config_file
-
+local prefix            = arg[3] and arg[3]:upper() or ""
 -- not an `*.sh` file, because the Dyno manager should not exec
 local env_filename  = arg[2].."/"..rel_env_file
 
-local address           = "0.0.0.0"
+local address       = "0.0.0.0"
 local default_proxy_port      = 8000
 local default_proxy_port_ssl  = 8443
 local default_admin_port      = 8001
 local default_admin_port_ssl  = 8444
 
 -- Read environment variables for runtime config
-local port              = os.getenv("PORT") or default_proxy_port
-local expose_service    = os.getenv("KONG_EXPOSE") -- `proxy` (default), `admin`, `adminssl`, `proxyssl`
+local port              = os.getenv(prefix.."_PORT") or os.getenv("PORT") or default_proxy_port
 local pg_url            = os.getenv("DATABASE_URL") or "postgres://localhost:5432/kong"
+local expose_service    = os.getenv(prefix.."_KONG_EXPOSE") or os.getenv("KONG_EXPOSE") -- `proxy` (default), `admin`, `adminssl`, `proxyssl`
 
 local parsed_pg_url = url.parse(pg_url, default)
 

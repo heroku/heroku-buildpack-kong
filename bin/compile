@@ -49,7 +49,7 @@ KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 # If upgrading any those archives, then update the corresponding version here.
 LUAROCKS_VERSION=2.4.2
 OPENSSL_VERSION=1.0.2l
-OPENRESTY_VERSION=1.11.2.4
+OPENRESTY_VERSION=1.13.6.1
 
 function error() {
   echo " !     $*" >&2
@@ -159,7 +159,7 @@ then
 elif [ "$DIFF_STATUS" == 0 ] || [ "$DIFF_STATUS" == 1 ]
 then
   topic "Changes detected"
-  IFS=$'\n' 
+  IFS=$'\n'
   for DIFF_LINE in $(cat "$VENDOR_DIFF"); do
     echo "       $DIFF_LINE"
   done
@@ -196,7 +196,7 @@ then
   ./configure --prefix=${APP_PREFIX} --lua-suffix=jit --with-lua=${APP_PREFIX}/luajit --with-lua-include=${APP_PREFIX}/luajit/include/luajit-2.1
   make build
   make install
-  cd ..  
+  cd ..
 
 
   topic "Caching build"
