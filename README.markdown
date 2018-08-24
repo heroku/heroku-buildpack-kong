@@ -1,6 +1,6 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org/about/)
 =========================
-Deploy [Kong 0.11 Community Edition](https://konghq.com/kong-community-edition/) as a Heroku app.
+Deploy [Kong 0.14 Community Edition](https://konghq.com/kong-community-edition/) as a Heroku app.
 
 🌈 This buildpack now deploys genuine Mashape Kong, [built from source on Github](bin/compile#L226); patches are no longer required for compatibility with Heroku.
 
@@ -45,10 +45,10 @@ git push heroku master
 #### Plugins & other Lua source
 
   * [Kong plugins](https://getkong.org/plugins/)
-    * [Development guide](https://getkong.org/docs/0.11.x/plugin-development/)
+    * [Development guide](https://docs.konghq.com/0.14.x/plugin-development/)
     * `lib/kong/plugins/{NAME}`
-    * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua` 
-    * See: [Plugin File Structure](https://getkong.org/docs/0.11.x/plugin-development/file-structure/)
+    * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua`
+    * See: [Plugin File Structure](https://docs.konghq.com/0.14.x/plugin-development/file-structure/)
   * Lua rocks
     * specify in the app's `Rockfile`
     * each line is `{NAME} {VERSION}`
@@ -60,34 +60,69 @@ git push heroku master
 
   * `PORT` exposed on the app/dyno
     * set automatically by the Heroku dyno manager
+  * `<CUSTOM>_PORT` if you'd like to specify a custom port per process type for the instance to listen on,
+    (useful for exposing to private spaces network) then you can set an env
+    var the the name of the process prepended to `_PORT` like so:
+
+    ```
+    Procfile
+    --------
+    web: bin/heroku-buildpack-web
+    private: bin/heroku-buildpack-web
+    ```
+
+    ```
+    Env var
+    -------
+    PRIVATE_PORT=<desired port number here>
+    ```
+
+    * The gateway can then be accessed via [Heroku's private space DNS service discovery](https://devcenter.heroku.com/articles/dyno-dns-service-discovery)
+    * NOTE: `web` process always has to bind to the `$PORT` env var so specifying
+    a custom `WEB_PORT` would cause the app to crash
   * `KONG_GIT_URL` git repo URL for Kong source
     * example `https://github.com/Mashape/kong.git`
   * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
     * example `master`
   * `DATABASE_URL`
     * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)
+  * `KONG_EXPOSE` allows you to choose which listener is exposed to the specified port
+    * `proxy` (default), `admin`, `adminssl`, `proxyssl`
+  * `<CUSTOM>_KONG_EXPOSE` allows you to choose which listener is exposed to the specified port
+  per process.
+    * If you don't specify this value, the value from `KONG_EXPOSE` will be used
+    * Using the `Procfile` example above, the env var would look something like:
 
+    ```
+    Env var
+    -------
+    PRIVATE_KONG_EXPOSE=<desired value>
+    ```
 
 #### Using Environment Variables in Plugins
 
 To use env vars within your own code.
 
-  1. Whitelist the variable name for use within Nginx 
+  1. Whitelist the variable name for use within Nginx
      * In a custom Nginx config file add `env MY_VARIABLE;`
      * See: [Nginx config](#user-content-nginx-config) (below)
   2. Access the variable in Lua plugins
      * Use `os.getenv('MY_VARIABLE')` to retrieve the value.
 
+#### Kong config
+
+To customize your `kong.conf`, create `config/kong.conf.etlua` based on the [sample config file](config/kong.conf.etlua.sample) in your project. By default, this buildpack will use this file as a template for the final kong.conf file. If you need to specify a separate template per process type, simply create
+`config/<process name>-kong.conf.etlua` where process name is that of the corresponding process in the Procfile. The latter use case is mostly for private space users.
 
 #### Nginx config
 
-Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://getkong.org/docs/0.11.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
+Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://docs.konghq.com/0.14.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
 
 #### Testing
 
 This buildpack supports [Heroku CI](https://devcenter.heroku.com/articles/heroku-ci) to automate test runs and integrate with deployment workflow.
 
-Tests should follow the [Kong plugin testing](https://getkong.org/docs/0.11.x/plugin-development/tests/) guide.
+Tests should follow the [Kong plugin testing](https://docs.konghq.com/0.14.x/plugin-development/tests/) guide.
 
 App requirements:
 
