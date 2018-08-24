@@ -1,6 +1,6 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org/about/)
 =========================
-Deploy [Kong 0.11 Community Edition](https://konghq.com/kong-community-edition/) as a Heroku app.
+Deploy [Kong 0.14 Community Edition](https://konghq.com/kong-community-edition/) as a Heroku app.
 
 🌈 This buildpack now deploys genuine Mashape Kong, [built from source on Github](bin/compile#L226); patches are no longer required for compatibility with Heroku.
 
@@ -45,10 +45,10 @@ git push heroku master
 #### Plugins & other Lua source
 
   * [Kong plugins](https://getkong.org/plugins/)
-    * [Development guide](https://getkong.org/docs/0.11.x/plugin-development/)
+    * [Development guide](https://docs.konghq.com/0.14.x/plugin-development/)
     * `lib/kong/plugins/{NAME}`
     * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua`
-    * See: [Plugin File Structure](https://getkong.org/docs/0.11.x/plugin-development/file-structure/)
+    * See: [Plugin File Structure](https://docs.konghq.com/0.14.x/plugin-development/file-structure/)
   * Lua rocks
     * specify in the app's `Rockfile`
     * each line is `{NAME} {VERSION}`
@@ -116,13 +116,13 @@ To customize your `kong.conf`, create `config/kong.conf.etlua` based on the [sam
 
 #### Nginx config
 
-Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://getkong.org/docs/0.11.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
+Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://docs.konghq.com/0.14.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
 
 #### Testing
 
 This buildpack supports [Heroku CI](https://devcenter.heroku.com/articles/heroku-ci) to automate test runs and integrate with deployment workflow.
 
-Tests should follow the [Kong plugin testing](https://getkong.org/docs/0.11.x/plugin-development/tests/) guide.
+Tests should follow the [Kong plugin testing](https://docs.konghq.com/0.14.x/plugin-development/tests/) guide.
 
 App requirements:
 

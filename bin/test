@@ -12,8 +12,13 @@ set -o pipefail
 BUILD_DIR="${1:-}"
 ENV_DIR="${2:-}"
 
-# Override normal non-SSL Postgres test config.
-export KONG_PG_SSL="${KONG_PG_SSL:-on}"
+# Reexports to test config
+export KONG_TEST_PG_USER="${KONG_PG_USER}"
+export KONG_TEST_PG_PASSWORD="${KONG_PG_PASSWORD}"
+export KONG_TEST_PG_HOST="${KONG_PG_HOST}"
+export KONG_TEST_PG_PORT="${KONG_PG_PORT}"
+export KONG_TEST_PG_DATABASE="${KONG_PG_DATABASE}"
+export KONG_TEST_PG_SSL="${KONG_PG_SSL:-on}"
 # Use test config in the app.
 export KONG_CONF="spec/kong_tests.conf"
 
