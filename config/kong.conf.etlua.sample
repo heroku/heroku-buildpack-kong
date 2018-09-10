@@ -34,36 +34,61 @@ log_level = info                 # Log level of the Nginx server. Logs are
 # Note: See http://nginx.org/en/docs/ngx_core_module.html#error_log for a list
 # of accepted values.
 
-proxy_access_log = off                    # Path for proxy port request access
+proxy_access_log = /dev/stderr            # Path for proxy port request access
                                           # logs. Set this value to `off` to
                                           # disable logging proxy requests.
                                           # If this value is a relative path, it
                                           # will be placed under the `prefix`
                                           # location.
 
-#proxy_error_log = logs/error.log         # Path for proxy port request error
+proxy_error_log = /dev/stderr             # Path for proxy port request error
                                           # logs. Granularity of these logs is
                                           # adjusted by the `log_level`
                                           # directive.
 
-admin_access_log = off                    # Path for Admin API request access
+admin_access_log = /dev/stderr            # Path for Admin API request access
                                           # logs. Set this value to `off` to
                                           # disable logging Admin API requests.
                                           # If this value is a relative path, it
                                           # will be placed under the `prefix`
                                           # location.
 
-#admin_error_log = logs/error.log         # Path for Admin API request error
+admin_error_log = /dev/stderr             # Path for Admin API request error
                                           # logs. Granularity of these logs is
                                           # adjusted by the `log_level`
                                           # directive.
 
-#custom_plugins =                # Comma-separated list of additional plugins
-                                 # this node should load.
-                                 # Use this property to load custom plugins
-                                 # that are not bundled with Kong.
-                                 # Plugins will be loaded from the
-                                 # `kong.plugins.{name}.*` namespace.
+plugins = bundled,hello-world-header,ndfd-xml-as-json
+                                 # Comma-separated list of plugins this node
+                                 # should load. By default, only plugins
+                                 # bundled in official distributions are
+                                 # loaded via the `bundled` keyword.
+                                 #
+                                 # Loading a plugin does not enable it by
+                                 # default, but only instructs Kong to load its
+                                 # source code, and allows to configure the
+                                 # plugin via the various related Admin API
+                                 # endpoints.
+                                 #
+                                 # The specified name(s) will be substituted as
+                                 # such in the Lua namespace:
+                                 # `kong.plugins.{name}.*`.
+                                 #
+                                 # When the `off` keyword is specified as the
+                                 # only value, no plugins will be loaded.
+                                 #
+                                 # `bundled` and plugin names can be mixed
+                                 # together, as the following examples suggest:
+                                 #
+                                 # - plugins = bundled, custom-auth
+                                 #     > will load all bundled plugins and
+                                 #       another plugin `custom-auth`
+                                 #
+                                 # - plugins = key-auth, custom-auth
+                                 #     > will only load these two plugins
+                                 #
+                                 # - plugins = off
+                                 #     > will not load any plugin
 
 #anonymous_reports = on          # Send anonymous usage data such as error
                                  # stack traces to help improve Kong.
@@ -72,7 +97,7 @@ admin_access_log = off                    # Path for Admin API request access
 # NGINX
 #------------------------------------------------------------------------------
 
-proxy_listen = <%= proxy_listen %>
+proxy_listen = 0.0.0.0:<%= proxy_port %>
                                  # Address and port on which Kong will accept
                                  # HTTP requests.
                                  # This is the public-facing entrypoint of
@@ -81,18 +106,17 @@ proxy_listen = <%= proxy_listen %>
 # Note: See http://nginx.org/en/docs/http/ngx_http_core_module.html#listen for
 # a description of the accepted formats for this and other *_listen values.
 
-proxy_listen_ssl = <%= proxy_listen_ssl %>
+proxy_listen_ssl = 0.0.0.0:<%= proxy_ssl_port %>
                                  # Address and port on which Kong will accept
                                  # HTTPS requests if `ssl` is enabled.
 
-admin_listen = <%= admin_listen %>
+admin_listen = 0.0.0.0:<%= admin_api_port %>
                                  # Address and port on which Kong will expose
                                  # an entrypoint to the Admin API.
                                  # This API lets you configure and manage Kong,
                                  # and should be kept private and secured.
 
-#admin_listen_ssl = <%= admin_listen_ssl %>
-                                 # Address and port on which Kong will accept
+#admin_listen_ssl = 0.0.0.0:8444 # Address and port on which Kong will accept
                                  # HTTPS requests to the admin API, if
                                  # `admin_ssl` is enabled.
 
@@ -183,17 +207,31 @@ admin_ssl = off                  # Determines if Nginx should be listening for
                                  # process. When this number is exceeded, the
                                  # least recently used connections are closed.
 
-#server_tokens = on              # Enables or disables emitting Kong version on
-                                 # error pages and in the "Server" or "Via"
-                                 # (in case the request was proxied) response
-                                 # header field.
+#headers = server_tokens, latency_tokens
+                                 # Specify Kong-specific headers that should
+                                 # be injected in responses to the client.
+                                 # Acceptable values are:
+                                 # - `server_tokens`: inject 'Via' and 'Server'
+                                 #   headers.
+                                 # - `latency_tokens`: inject
+                                 #   'X-Kong-Proxy-Latency' and
+                                 #   'X-Kong-Upstream-Latency' headers.
+                                 # - `X-Kong-<header-name>`: only inject this
+                                 #   specific the header when applicable.
+                                 #
+                                 # Example:
+                                 #   headers = via, latency_tokens
+                                 #
+                                 # This value can be set to `off`, which
+                                 # prevents Kong from injecting any of these
+                                 # headers. Note that plugins can still inject
+                                 # headers.
 
-#latency_tokens = on             # Enables or disables emitting Kong latency
-                                 # information in the "X-Kong-Proxy-Latency"
-                                 # and "X-Kong-Upstream-Latency" response
-                                 # header fields.
-
-#trusted_ips =                   # Defines trusted IP addresses blocks that are
+trusted_ips = 10.0.0.0/8,172.16.0.0/12
+                                 # Preset to trust Heroku routers in 
+                                 # Common Runtime & Private Spaces.
+                                 #
+                                 # Defines trusted IP addresses blocks that are
                                  # known to send correct X-Forwarded-* headers.
                                  # Requests from trusted IPs make Kong forward
                                  # their X-Forwarded-* headers upstream.
@@ -215,7 +253,7 @@ admin_ssl = off                  # Determines if Nginx should be listening for
 # See http://nginx.org/en/docs/http/ngx_http_realip_module.html for
 # examples of accepted values.
 
-#real_ip_header = X-Real-IP      # Defines the request header field whose value
+real_ip_header = X-Forwarded-For # Defines the request header field whose value
                                  # will be used to replace the client address.
                                  # This value sets the ngx_http_realip_module
                                  # directive of the same name in the Nginx
@@ -233,7 +271,7 @@ admin_ssl = off                  # Determines if Nginx should be listening for
 # See https://www.nginx.com/resources/admin-guide/proxy-protocol/ for more
 # details about the `proxy_protocol` parameter.
 
-#real_ip_recursive = off         # This value sets the ngx_http_realip_module
+real_ip_recursive = on           # This value sets the ngx_http_realip_module
                                  # directive of the same name in the Nginx
                                  # configuration.
 # Note:
@@ -297,9 +335,9 @@ pg_host = <%= pg_host %>
 pg_port = <%= pg_port %>         
 pg_user = <%= pg_user %>         
 pg_password = <%= pg_password %> 
-pg_database = <%= pg_database %>
+pg_database = <%= pg_dbname %>   
 
-#pg_ssl = off                    # Toggles client-server TLS connections
+pg_ssl = on                      # Toggles client-server TLS connections
                                  # between Kong and PostgreSQL.
 
 #pg_ssl_verify = off             # Toggles server certificate verification if
