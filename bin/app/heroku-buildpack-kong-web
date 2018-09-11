@@ -2,7 +2,7 @@
 set -eu
 
 # Customized Nginx setup
-# https://getkong.org/docs/0.11.x/configuration/#customized-nginx-setup
+# https://docs.konghq.com/0.14.x/configuration/
 
 APP_PREFIX="${APP_PREFIX:-/app/.heroku}"
 KONG_CONF="${KONG_CONF:-config/kong.conf}"

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -eu
 
-KONG_CONF="${KONG_CONF:-config/kong.conf}"
+export KONG_CONF="${KONG_CONF:-config/kong.conf}"
+
+if [ -x "bin/prerelease" ]
+then
+  echo "Running app's bin/prerelease"
+  ./bin/prerelease
+fi
 
 kong migrations up -c $KONG_CONF $@
