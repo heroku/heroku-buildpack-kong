@@ -83,6 +83,14 @@ To use env vars within your own code.
 
 Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://docs.konghq.com/0.14.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
 
+#### Pre-release script
+
+This buildpack installs a [release phase](https://devcenter.heroku.com/articles/release-phase) script to automatically run Kong's database migrations for each deployment.
+
+Apps can define a custom pre-release script which will be automatically invoked before the built-in release phase script.
+
+Simply commit your executable script to the app's repo as `bin/prerelease`, and then that script will be run for every release. The release will fail if the script exits with non-zero status.
+
 #### Testing
 
 This buildpack supports [Heroku CI](https://devcenter.heroku.com/articles/heroku-ci) to automate test runs and integrate with deployment workflow.
