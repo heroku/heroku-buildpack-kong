@@ -10,11 +10,15 @@ Deploy [Kong 0.14 Community Edition](https://konghq.com/kong-community-edition/)
 Usage
 -----
 
-### Example
-
-Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get started.
+⏩ **Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get started.**
 
 ### Custom
+
+While it's possible to use this buildpack directly, you'll be giving up quite a few features of the [heroku-kong app](https://github.com/heroku/heroku-kong):
+
+* Admin API will not be automatically proxied for secure external access
+* Admin Console via `heroku run` will require manual setup
+* local development is not preconfigured
 
 Create a new git repo and Heroku app:
 
