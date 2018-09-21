@@ -63,12 +63,16 @@ git push heroku master
 
   * `PORT` exposed on the app/dyno
     * set automatically by the Heroku dyno manager
-  * `KONG_GIT_URL` git repo URL for Kong source
-    * example `https://github.com/Mashape/kong.git`
-  * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-    * example `master`
   * `DATABASE_URL`
     * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)
+  * Kong itself may be configured with [`KONG_` prefixed variables](https://docs.konghq.com/0.14.x/configuration/#environment-variables)
+  * Heroku build configuration:
+    * These variables only effect new deployments.
+    * ⏱ **Setting these will lengthen build-time, usually 4-8 minutes for compilation from source.** By default, this buildpack downloads pre-compiled, cached Kong binaries to accelerate deployment time. (More details available in [DEV](DEV.md).)
+    * `KONG_GIT_URL` git repo URL for Kong source
+      * default: `https://github.com/kong/kong.git`
+    * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
+      * default: `master`
 
 
 #### Using Environment Variables in Plugins
