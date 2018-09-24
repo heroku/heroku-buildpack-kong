@@ -120,32 +120,30 @@ export LUA_PATH="\$HOME/lib/?.lua;\$HOME/lib/?/init.lua;\$HOME/.luarocks/share/l
 export LUA_CPATH="\$HOME/lib/?.so;\$HOME/.luarocks/lib/lua/5.1/?.so;\$HOME/${KONG_RUNTIME}/lib/lua/5.1/?.so;./?.so"
 EOF
 
+# ~~~~~ Keep these values in sync with the runtime profile script above ~~~~~
+export PATH="$APP_PREFIX/nginx/sbin:$APP_PREFIX/luajit/bin:$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
+export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
+export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
+export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include"
+export CPATH="$INCLUDE_PATH"
+export CPPPATH="$INCLUDE_PATH"
+export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig"
+export LUA_PATH="$BUILD_DIR/lib/?.lua;$BUILD_DIR/lib/?/init.lua;$BUILD_DIR/.luarocks/share/lua/5.1/?.lua;$BUILD_DIR/.luarocks/share/lua/5.1/?/init.lua;$APP_PREFIX/share/lua/5.1/?.lua;$APP_PREFIX/share/lua/5.1/?/init.lua;./?.lua"
+export LUA_CPATH="$BUILD_DIR/lib/?.so;$BUILD_DIR/.luarocks/lib/lua/5.1/?.so;$APP_PREFIX/lib/lua/5.1/?.so;./?.so"
+
+#give environment to later buildpacks
+export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPPATH|PKG_CONFIG_PATH)='  > "$BP_DIR/export"
+
 if [ $IS_CUSTOM_BUILD = false ]
 then
   topic "Installing Kong for buildpack ${ARCHIVE_BUILDPACK_VERSION}"
+  cd "${APP_PREFIX}"
   curl --progress-bar -O "https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
-  cd $BUILD_DIR
-  tar -xzf "kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
+  tar  --strip-components=2 -xzf "kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
+  rm "kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
 else
 
   # Proceed with build from source
-
-  # ~~~~~ Keep these values in sync with the runtime profile script above ~~~~~
-  export PATH="$APP_PREFIX/nginx/sbin:$APP_PREFIX/luajit/bin:$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
-  export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
-  export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
-  export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include"
-  export CPATH="$INCLUDE_PATH"
-  export CPPPATH="$INCLUDE_PATH"
-  export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig"
-  export LUA_PATH="$BUILD_DIR/lib/?.lua;$BUILD_DIR/lib/?/init.lua;$BUILD_DIR/.luarocks/share/lua/5.1/?.lua;$BUILD_DIR/.luarocks/share/lua/5.1/?/init.lua;$APP_PREFIX/share/lua/5.1/?.lua;$APP_PREFIX/share/lua/5.1/?/init.lua;./?.lua"
-  export LUA_CPATH="$BUILD_DIR/lib/?.so;$BUILD_DIR/.luarocks/lib/lua/5.1/?.so;$APP_PREFIX/lib/lua/5.1/?.so;./?.so"
-
-  #give environment to later buildpacks
-  export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPPATH|PKG_CONFIG_PATH)='  > "$BP_DIR/export"
-
-  # Once the installed packages are in the PATH, use them.
-
   # Build from source to have dyno-compatible path prefix
 
   # Cache the build
@@ -280,7 +278,7 @@ else
 fi
 
 # Avoid moving build for CI, because build is in the right place already.
-if [ $IS_CUSTOM_BUILD = true ] && [ ! "$BUILD_DIR" = "/app" ]; then
+if [ ! "$BUILD_DIR" = "/app" ]; then
   topic "Making build artifacts available to app"
   mv $APP_PREFIX $BUILD_DIR/$KONG_RUNTIME
 fi
