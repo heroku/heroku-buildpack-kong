@@ -5,6 +5,10 @@ Deploy [Kong 0.14 Community Edition](https://konghq.com/kong-community-edition/)
 
 🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
 
+Upgrading
+---------
+
+🚨 **Potentially breaking change** in v6.0.0 to support rapid deployments using a pre-compiled Kong binary. See: [UPGRADING](UPGRADING.md).
 
 Usage
 -----

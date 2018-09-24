@@ -23,22 +23,4 @@ then
   ./bin/prerelease
 fi
 
-echo "~~~~~~~ Debug ~~~~~~~"
-echo "which resty"
-which resty || echo "(none)"
-echo '/usr/bin/env'
-/usr/bin/env
-echo '$PATH'
-echo "$PATH"
-echo "ls -hal /app"
-ls -hal /app || echo "(none)"
-echo "ls -hal /app/.heroku"
-ls -hal /app/.heroku || echo "(none)"
-echo "ls -hal /app/.heroku/bin"
-ls -hal /app/.heroku/bin || echo "(none)"
-echo "ls -hal /app/kong-runtime"
-ls -hal /app/kong-runtime || echo "(none)"
-echo "ls -hal /app/kong-runtime/bin"
-ls -hal /app/kong-runtime/bin || echo "(none)"
-
 kong migrations up -c $KONG_CONF $@

@@ -109,15 +109,15 @@ topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 # ~~~~~ Keep these values in sync with the build-time exports below ~~~~~
 cat <<EOF >$BUILD_DIR/.profile.d/000_buildpack_kong.sh
-export PATH="\$HOME/\$KONG_RUNTIME/nginx/sbin:\$HOME/\$KONG_RUNTIME/luajit/bin:\$HOME/\$KONG_RUNTIME/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
-export LD_LIBRARY_PATH="\$HOME/\$KONG_RUNTIME/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
-export LIBRARY_PATH="\$HOME/\$KONG_RUNTIME/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
-export INCLUDE_PATH="\$HOME/\$KONG_RUNTIME/include:\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
+export PATH="\$HOME/${KONG_RUNTIME}/nginx/sbin:\$HOME/${KONG_RUNTIME}/luajit/bin:\$HOME/${KONG_RUNTIME}/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
+export LD_LIBRARY_PATH="\$HOME/${KONG_RUNTIME}/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
+export LIBRARY_PATH="\$HOME/${KONG_RUNTIME}/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
+export INCLUDE_PATH="\$HOME/${KONG_RUNTIME}/include:\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
 export CPATH="\$INCLUDE_PATH"
 export CPPPATH="\$INCLUDE_PATH"
 export PKG_CONFIG_PATH="\$HOME/.apt/usr/local/lib/pkgconfig:\$HOME/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:\$HOME/.apt/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"
-export LUA_PATH="\$HOME/lib/?.lua;\$HOME/lib/?/init.lua;\$HOME/.luarocks/share/lua/5.1/?.lua;\$HOME/.luarocks/share/lua/5.1/?/init.lua;\$HOME/\$KONG_RUNTIME/share/lua/5.1/?.lua;\$HOME/\$KONG_RUNTIME/share/lua/5.1/?/init.lua;./?.lua"
-export LUA_CPATH="\$HOME/lib/?.so;\$HOME/.luarocks/lib/lua/5.1/?.so;\$HOME/\$KONG_RUNTIME/lib/lua/5.1/?.so;./?.so"
+export LUA_PATH="\$HOME/lib/?.lua;\$HOME/lib/?/init.lua;\$HOME/.luarocks/share/lua/5.1/?.lua;\$HOME/.luarocks/share/lua/5.1/?/init.lua;\$HOME/${KONG_RUNTIME}/share/lua/5.1/?.lua;\$HOME/${KONG_RUNTIME}/share/lua/5.1/?/init.lua;./?.lua"
+export LUA_CPATH="\$HOME/lib/?.so;\$HOME/.luarocks/lib/lua/5.1/?.so;\$HOME/${KONG_RUNTIME}/lib/lua/5.1/?.so;./?.so"
 EOF
 
 if [ $IS_CUSTOM_BUILD = false ]
@@ -268,6 +268,16 @@ mv config/* $BUILD_DIR/config
 # Move executables for Procfile into place
 mkdir -p $BUILD_DIR/bin
 cp $BP_DIR/bin/app/heroku-* $BUILD_DIR/bin/
+
+topic "Applying buildpack v6.0.0 backward-compatibility patch"
+if [ ! -d ".heroku" ]
+then
+  echo "Linking '/app/.heroku' to '/app/$KONG_RUNTIME'" | indent
+  ln -s "$KONG_RUNTIME/" .heroku
+else
+  echo "'/app/.heroku' exists. Linking skipped." | indent
+  echo "Ensure the app's 'config/kong.conf.etlua' sets the prefix to '/app/$KONG_RUNTIME'" | indent
+fi
 
 # Avoid moving build for CI, because build is in the right place already.
 if [ $IS_CUSTOM_BUILD = true ] && [ ! "$BUILD_DIR" = "/app" ]; then
