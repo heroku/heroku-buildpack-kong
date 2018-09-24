@@ -122,8 +122,8 @@ EOF
 
 if [ $IS_CUSTOM_BUILD = false ]
 then
-  topic "Installing Kong ${KONG_GIT_COMMITISH} from buildpack ${ARCHIVE_BUILDPACK_VERSION}"
-  curl --progress-bar -O "https://kong-on-heroku.s3.amazonaws.com/kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
+  topic "Installing Kong for buildpack ${ARCHIVE_BUILDPACK_VERSION}"
+  curl --progress-bar -O "https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
   cd $BUILD_DIR
   tar -xzf "kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
 else
