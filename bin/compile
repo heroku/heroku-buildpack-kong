@@ -28,7 +28,7 @@ mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
 IS_CUSTOM_BUILD=false
-ARCHIVE_BUILDPACK_VERSION=v5.1.1
+RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v6.0.0.tgz}"
 
 # Source for Kong
 if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
@@ -136,11 +136,8 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 
 if [ $IS_CUSTOM_BUILD = false ]
 then
-  topic "Installing Kong for buildpack ${ARCHIVE_BUILDPACK_VERSION}"
-  cd "${APP_PREFIX}"
-  curl --progress-bar -O "https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
-  tar  --strip-components=2 -xzf "kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
-  rm "kong-runtime-${ARCHIVE_BUILDPACK_VERSION}.tgz"
+  topic "Installing Kong for buildpack from ${RUNTIME_ARCHIVE_URL}"
+  curl --silent --location "${RUNTIME_ARCHIVE_URL}" | tar xzm -C "${APP_PREFIX}" --strip-components=2
 else
 
   # Proceed with build from source

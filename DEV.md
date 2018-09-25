@@ -1,6 +1,6 @@
 # Buildpack Development
 
-## Caching of compiled artifacts
+## Pre-compiled runtime archive
 
 Requires an S3 bucket with a public-by-default policy:
 
@@ -41,7 +41,8 @@ git push heroku master
 `heroku run bash` to app, and then capture the artifacts:
 
 ```bash
-ARCHIVE_NAME=kong-runtime-v5.1.1.tgz
+BUILDPACK_RELEASE_TAG=v6.0.0
+ARCHIVE_NAME=kong-runtime-$BUILDPACK_RELEASE_TAG.tgz
 tar czfv $ARCHIVE_NAME ./kong-runtime
 aws s3 cp $ARCHIVE_NAME s3://kong-on-heroku/
 ```
