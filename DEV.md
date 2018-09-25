@@ -30,6 +30,10 @@ Make sure the templator app has the AWS CLI install:
 
 ```bash
 heroku buildpacks:add --index=1 mars/awscli
+heroku config:set \
+  AWS_ACCESS_KEY_ID=xxxxx \
+  AWS_SECRET_ACCESS_KEY=yyyyy \
+  AWS_DEFAULT_REGION=us-west-1
 git commit --allow-empty -m 'Add AWS CLI buildpack'
 git push heroku master
 ```
