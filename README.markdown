@@ -5,11 +5,14 @@ Deploy [Kong 0.14 Community Edition](https://konghq.com/kong-community-edition/)
 
 🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
 
-
 Usage
 -----
 
 ⏩ **Deploy the [heroku-kong app](https://github.com/heroku/heroku-kong) to get started.**
+
+### Upgrading
+
+Potentially breaking changes are documented in [UPGRADING](UPGRADING.md).
 
 ### Custom
 
@@ -63,12 +66,17 @@ git push heroku master
 
   * `PORT` exposed on the app/dyno
     * set automatically by the Heroku dyno manager
-  * `KONG_GIT_URL` git repo URL for Kong source
-    * example `https://github.com/Mashape/kong.git`
-  * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-    * example `master`
   * `DATABASE_URL`
     * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)
+  * Kong itself may be configured with [`KONG_` prefixed variables](https://docs.konghq.com/0.14.x/configuration/#environment-variables)
+  * Heroku build configuration:
+    * These variables only effect new deployments.
+    * `KONG_RUNTIME_ARCHIVE_URL` location of [pre-compiled Kong runtime archive](DEV.md#pre-compiled-runtime-archive)
+    * ⏱ **Setting these will lengthen build-time, usually 4-8 minutes for compilation from source.** By default, this buildpack downloads pre-compiled, cached Kong binaries to accelerate deployment time. (More details available in [DEV](DEV.md).)
+    * `KONG_GIT_URL` git repo URL for Kong source
+      * default: `https://github.com/kong/kong.git`
+    * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
+      * default: `master`
 
 
 #### Using Environment Variables in Plugins
@@ -110,7 +118,7 @@ Background
 ----------
 The first time this buildpack builds an app, the build time will be significantly longer as Kong and its dependencies are compiled from source. **The compiled artifacts are cached to speed up subsequent builds.**
 
-We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with a writable `/app/.heroku` prefix. Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local` which is read-only in a dyno.
+We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with a writable `/app/kong-runtime` prefix. Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local` which is read-only in a dyno.
 
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source.
 
