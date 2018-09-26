@@ -116,14 +116,13 @@ See: sample [Heroku Kong app](https://github.com/heroku/heroku-kong) which conta
 
 Background
 ----------
-The first time this buildpack builds an app, the build time will be significantly longer as Kong and its dependencies are compiled from source. **The compiled artifacts are cached to speed up subsequent builds.**
-
 We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with a writable `/app/kong-runtime` prefix. Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local` which is read-only in a dyno.
 
 OpenSSL 1.0.2 (required by OpenResty) is also compiled from source.
 
-
 ### Modification
+
+This buildpack normally downloads an archive of the pre-compiled Kong runtime, and so skips a very lengthy (~10-minute) build process. To skip that cache speed-up and compile it, set either [`KONG_GIT_URL` or `KONG_GIT_COMMITISH`](#user-content-environment-variables). To create a new archive, see [DEV notes](DEV.md#pre-compiled-runtime-archive).
 
 This buildpack caches its compilation artifacts from the sources in `vendor/`. Changes to the sources in `vendor/` will be detected and the cache ignored.
 
