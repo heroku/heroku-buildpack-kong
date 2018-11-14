@@ -97,7 +97,7 @@ for PACKAGE in $(cat $BP_DIR/Aptfile $BUILD_DIR/Aptfile); do
     curl -s -L -z $PACKAGE_FILE -o $PACKAGE_FILE $PACKAGE 2>&1 | indent
   else
     topic "Fetching .debs for $PACKAGE"
-    apt-get $APT_OPTIONS -y --force-yes -d install --reinstall $PACKAGE | indent
+    apt-get $APT_OPTIONS -y --allow-downgrades --allow-remove-essential --allow-change-held-packages -d install --reinstall $PACKAGE | indent
   fi
 done
 
@@ -201,7 +201,18 @@ else
     topic "Building OpenResty"
     tar -xf openresty-${OPENRESTY_VERSION}.tar.gz
     cd openresty-${OPENRESTY_VERSION}
-    ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
+    ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
+    
+    # BEGIN Temporary workaround for "undefined reference to `pthread_atfork'"
+    # until OpenResty upgrades from nginx-1.13.6 to at least 1.13.11.
+    # https://github.com/openssl/openssl/issues/3884#issuecomment-333350227
+    #
+    # version contained by current OpenResty version, this will break when OpenResty is upgraded
+    nginx_Makefile="build/nginx-1.13.6/objs/Makefile"
+    gawk '/pthread/ { sub(/-lpthread /, ""); sub(/-lpthread /, ""); sub(/\\/, "-lpthread \\"); print } ! /pthread/ { print }' \
+      ${nginx_Makefile} > ${nginx_Makefile}-forOpenResty && mv ${nginx_Makefile}-forOpenResty ${nginx_Makefile}
+    # END Temporary workaround for "undefined reference to `pthread_atfork'"
+
     make
     make install
     cd ..
