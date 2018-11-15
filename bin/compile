@@ -27,11 +27,8 @@ BP_CACHE_DIR="$CACHE_DIR/heroku-kong-buildpack"
 mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
-# While Kong version 1.0 is work-in-progress, never use runtime archive.
-#IS_CUSTOM_BUILD=false
-IS_CUSTOM_BUILD=true
-
-RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v6.0.0.tgz}"
+IS_CUSTOM_BUILD=false
+RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v7.0.0-rc2.tgz}"
 
 # Source for Kong
 if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
