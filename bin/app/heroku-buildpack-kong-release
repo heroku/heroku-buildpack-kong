@@ -17,12 +17,11 @@ do
   fi
 done
 
-kong migrations bootstrap -c $KONG_CONF
-
 if [ -x "bin/prerelease" ]
 then
   echo "Running app's bin/prerelease"
   ./bin/prerelease
 fi
 
+kong migrations bootstrap -c $KONG_CONF
 kong migrations up -c $KONG_CONF $@
