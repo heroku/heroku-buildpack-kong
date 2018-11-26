@@ -4,6 +4,10 @@ set -eu
 export KONG_CONF="${KONG_CONF:-config/kong.conf}"
 
 echo "Checking connection to Postgres database"
+if [ -z "${KONG_PG_USER}" ]; then
+  echo 'Postgres database is not yet configured. `KONG_PG_USER` is empty. The release may be retried.'
+  exit 2
+fi
 database_fails=1
 while ! psql $DATABASE_URL --quiet --output /dev/null -c "SELECT 1"
 do
