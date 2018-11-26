@@ -104,11 +104,11 @@ env_file:write("export KONG_PROXY_LISTEN_SSL=${KONG_PROXY_LISTEN_SSL:-"..proxy_l
 env_file:write("export KONG_ADMIN_LISTEN=${KONG_ADMIN_LISTEN:-"..admin_listen.."}\n")
 env_file:write("export KONG_ADMIN_LISTEN_SSL=${KONG_ADMIN_LISTEN_SSL:-"..admin_listen_ssl.."}\n")
 
-env_file:write("export KONG_PG_HOST="..pg_host.."\n")
-env_file:write("export KONG_PG_PORT="..pg_port.."\n")
-env_file:write("export KONG_PG_USER="..pg_user.."\n")
-env_file:write("export KONG_PG_PASSWORD="..pg_password.."\n")
-env_file:write("export KONG_PG_DATABASE="..pg_database.."\n")
+env_file:write("export KONG_PG_HOST="..pg_host or "".."\n")
+env_file:write("export KONG_PG_PORT="..pg_port or "".."\n")
+env_file:write("export KONG_PG_USER="..pg_user or "".."\n")
+env_file:write("export KONG_PG_PASSWORD="..pg_password or "".."\n")
+env_file:write("export KONG_PG_DATABASE="..pg_database or "".."\n")
 
 -- env_file:seek("set", 0)
 -- print(".profile.d/kong-env: \n"..env_file:read("*a"))
