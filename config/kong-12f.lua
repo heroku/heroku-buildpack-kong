@@ -93,6 +93,8 @@ local config = template(values)
 local config_file
 config_file = io.open(config_filename, "w")
 config_file:write(config)
+config_file:seek("set", 0)
+print(config_filename..": \n"..config_file:read("*a"))
 config_file:close()
 
 print("Wrote Kong config: "..rel_config_file)
@@ -114,8 +116,8 @@ env_file:write("export KONG_PG_USER="..pg_user or "".."\n")
 env_file:write("export KONG_PG_PASSWORD="..pg_password or "".."\n")
 env_file:write("export KONG_PG_DATABASE="..pg_database or "".."\n")
 
--- env_file:seek("set", 0)
--- print(".profile.d/kong-env: \n"..env_file:read("*a"))
+env_file:seek("set", 0)
+print(".profile.d/kong-env: \n"..env_file:read("*a"))
 
 env_file:close()
 print("Wrote environment exports: "..rel_env_file)
