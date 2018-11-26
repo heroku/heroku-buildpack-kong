@@ -68,20 +68,24 @@ else
 end
 
 -- Render the Kong configuration file
+--
+-- Some parts of `kong` CLI such as `kong migrations bootstrap` still
+-- seem to require config file (env vars are ignored), so render a
+-- complete `kong.conf` file.
 local template_file = io.open(template_filename, "r")
 local template = etlua.compile(template_file:read("*a"))
 template_file:close()
 
 local values = {
-  proxy_listen          = proxy_listen,
-  proxy_listen_ssl      = proxy_listen_ssl,
-  admin_listen      = admin_listen,
-  admin_listen_ssl  = admin_listen_ssl,
-  pg_host             = pg_host,
-  pg_port             = pg_port,
-  pg_user             = pg_user,
-  pg_password         = pg_password,
-  pg_database         = pg_database
+  proxy_listen     = proxy_listen,
+  proxy_listen_ssl = proxy_listen_ssl,
+  admin_listen     = admin_listen,
+  admin_listen_ssl = admin_listen_ssl,
+  pg_host          = pg_host,
+  pg_port          = pg_port,
+  pg_user          = pg_user,
+  pg_password      = pg_password,
+  pg_database      = pg_database
 }
 
 local config = template(values)
