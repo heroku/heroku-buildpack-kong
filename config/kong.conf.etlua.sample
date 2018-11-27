@@ -99,7 +99,7 @@ plugins = bundled,hello-world-header,ndfd-xml-as-json
 
 # Heroku Kong expects listeners to be set via environment variables
 # such as `KONG_PROXY_LISTEN`
-proxy_listen = 0.0.0.0:<%= proxy_listen %>
+proxy_listen = <%= proxy_listen %>
                                  # Address and port on which Kong will accept
                                  # HTTP requests.
                                  # This is the public-facing entrypoint of
@@ -108,17 +108,17 @@ proxy_listen = 0.0.0.0:<%= proxy_listen %>
 # Note: See http://nginx.org/en/docs/http/ngx_http_core_module.html#listen for
 # a description of the accepted formats for this and other *_listen values.
 
-#proxy_listen_ssl = 0.0.0.0:<%= proxy_listen_ssl %>
+#proxy_listen_ssl = <%= proxy_listen_ssl %>
                                  # Address and port on which Kong will accept
                                  # HTTPS requests if `ssl` is enabled.
 
-admin_listen = 0.0.0.0:<%= admin_listen %>
+admin_listen = <%= admin_listen %>
                                  # Address and port on which Kong will expose
                                  # an entrypoint to the Admin API.
                                  # This API lets you configure and manage Kong,
                                  # and should be kept private and secured.
 
-#admin_listen_ssl = 0.0.0.0:<%= admin_listen_ssl %>
+#admin_listen_ssl = <%= admin_listen_ssl %>
                                  # Address and port on which Kong will accept
                                  # HTTPS requests to the admin API, if
                                  # `admin_ssl` is enabled.
