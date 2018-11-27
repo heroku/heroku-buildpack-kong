@@ -95,7 +95,8 @@ config_file = io.open(config_filename, "w")
 config_file:write(config)
 config_file:close()
 
-print("Wrote Kong config "..config_filename..": \n"..config)
+print("Wrote Kong config: "..config_filename)
+-- print("Wrote Kong config "..config_filename..": \n"..config)
 
 -- Also set KONG env vars which **override** config file values.
 -- write env vars to `.profile.d` file for Heroku runtime
@@ -116,8 +117,8 @@ env_file:write("export KONG_PG_USER="..pg_user or "".."\n")
 env_file:write("export KONG_PG_PASSWORD="..pg_password or "".."\n")
 env_file:write("export KONG_PG_DATABASE="..pg_database or "".."\n")
 
-env_file:seek("set", 0)
-print(".profile.d/kong-env: \n"..env_file:read("*a"))
+-- env_file:seek("set", 0)
+-- print(".profile.d/kong-env: \n"..env_file:read("*a"))
 
 env_file:close()
-print("Wrote environment exports: "..rel_env_file)
+print("Wrote environment exports: "..env_filename)
