@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-export KONG_CONF="${KONG_CONF:-config/kong.conf}"
+source .profile.d/kong-12f.sh
 
 echo "Checking connection to Postgres database"
 if [ -z "${DATABASE_URL:-}" ]; then

@@ -2,7 +2,7 @@ local etlua  = require "etlua"
 local socket = require "socket"
 local url    = require "socket.url"
 
-local rel_config_file = "config/kong.conf"
+local rel_config_file = os.getenv("KONG_CONF") or "config/kong.conf"
 local rel_env_file    = ".profile.d/kong-env"
 
 -- 12-factor config generator for Kong
@@ -104,6 +104,8 @@ print("Wrote Kong config: "..rel_config_file)
 -- https://devcenter.heroku.com/articles/profiled
 local env_file
 env_file = io.open(env_filename, "a+")
+
+env_file:write("export KONG_CONF="..rel_config_file.."\n")
 
 env_file:write("export KONG_PROXY_LISTEN=${KONG_PROXY_LISTEN:-"..proxy_listen.."}\n")
 env_file:write("export KONG_PROXY_LISTEN_SSL=${KONG_PROXY_LISTEN_SSL:-"..proxy_listen_ssl.."}\n")
