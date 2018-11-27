@@ -93,11 +93,9 @@ local config = template(values)
 local config_file
 config_file = io.open(config_filename, "w")
 config_file:write(config)
-config_file:seek("set", 0)
-print(config_filename..": \n"..config_file:read("*a"))
 config_file:close()
 
-print("Wrote Kong config: "..rel_config_file)
+print("Wrote Kong config "..config_filename..": \n"..config)
 
 -- Also set KONG env vars which **override** config file values.
 -- write env vars to `.profile.d` file for Heroku runtime
