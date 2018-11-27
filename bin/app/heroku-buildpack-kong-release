@@ -2,10 +2,6 @@
 set -eu
 
 echo "Checking connection to Postgres database"
-if [ -z "${DATABASE_URL:-}" ]; then
-  echo 'Postgres database is not yet configured. `DATABASE_URL` is empty. The release may be retried.'
-  exit 2
-fi
 database_fails=1
 while ! psql $DATABASE_URL --quiet --output /dev/null -c "SELECT 1"
 do
