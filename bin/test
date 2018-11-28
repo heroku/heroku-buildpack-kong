@@ -12,7 +12,10 @@ set -o pipefail
 BUILD_DIR="${1:-}"
 ENV_DIR="${2:-}"
 
+cd ${BUILD_DIR}
+
 # Reexports to test config
+export KONG_DATABASE=postgres
 export KONG_TEST_PG_USER="${KONG_PG_USER}"
 export KONG_TEST_PG_PASSWORD="${KONG_PG_PASSWORD}"
 export KONG_TEST_PG_HOST="${KONG_PG_HOST}"
@@ -27,10 +30,4 @@ then
   exit 2
 fi
 
-cd ${BUILD_DIR}
-
-# Initialize the database.
-kong migrations bootstrap -c $KONG_CONF
-
-# Run tests.
-bin/heroku-buildpack-kong-busted
+bin/heroku-buildpack-kong-busted -o gtest -v
