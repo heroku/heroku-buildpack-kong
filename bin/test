@@ -15,7 +15,7 @@ ENV_DIR="${2:-}"
 cd ${BUILD_DIR}
 
 # Reexports to test config
-export KONG_DATABASE=postgres
+export KONG_TEST_DATABASE=postgres
 export KONG_TEST_PG_USER="${KONG_PG_USER}"
 export KONG_TEST_PG_PASSWORD="${KONG_PG_PASSWORD}"
 export KONG_TEST_PG_HOST="${KONG_PG_HOST}"
