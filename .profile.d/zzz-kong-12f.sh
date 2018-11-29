@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Starting Kong 12-factor config"
+echo "Starting Kong 12-factor config (.profile.d/zzz-kong-12f.sh)"
 
 echo "=========================================="
 echo "Kong 12-factor config environment"
