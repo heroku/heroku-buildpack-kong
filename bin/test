@@ -14,12 +14,6 @@ ENV_DIR="${2:-}"
 
 cd ${BUILD_DIR}
 
-echo "=========================================="
-echo "Sourcing $BUILD_DIR/.profile.d/kong-env"
-echo "=========================================="
-cat $BUILD_DIR/.profile.d/kong-env
-echo "=========================================="
-
 # Load runtime environment
 source $BUILD_DIR/.profile.d/kong-env
 
@@ -37,19 +31,6 @@ if [ ! -f "$BUILD_DIR/$KONG_CONF" ]
 then
   echo "App must include '$KONG_CONF' file for test configuration."
   exit 2
-fi
-
-echo "=========================================="
-echo "heroku-buildpack-kong bin/test environment"
-echo "=========================================="
-env | sort | grep -E '^(KONG_|DATABASE_)'
-echo "=========================================="
-if [ -n "$DATABASE_URL" ]
-then
-  echo "heroku-buildpack-kong database tables"
-  echo "=========================================="
-  psql $DATABASE_URL -c '\d'
-  echo "=========================================="
 fi
 
 bin/heroku-buildpack-kong-busted -o gtest -v

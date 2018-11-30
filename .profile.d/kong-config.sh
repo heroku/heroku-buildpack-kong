@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Starting Kong 12-factor config (.profile.d/zzz-kong-12f.sh)"
-
-echo "=========================================="
-echo "Kong 12-factor config environment"
-echo "=========================================="
-env | sort | grep -E '^(KONG_|DATABASE_)'
-echo "=========================================="
+echo "Configuring Kong (.profile.d/kong-config.sh)"
 
 SRC_DIR=/app
 BIN_DIR=$(cd "$(dirname "$0")"; pwd)
