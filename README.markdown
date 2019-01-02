@@ -50,11 +50,11 @@ git push heroku master
 
 #### Plugins & other Lua source
 
-  * [Kong plugins](https://getkong.org/plugins/)
-    * [Development guide](https://docs.konghq.com/0.14.x/plugin-development/)
+  * [Kong plugins](https://docs.konghq.com/hub/)
+    * [Development guide](https://docs.konghq.com/1.0.x/plugin-development/)
     * `lib/kong/plugins/{NAME}`
     * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua`
-    * See: [Plugin File Structure](https://docs.konghq.com/0.14.x/plugin-development/file-structure/)
+    * See: [Plugin File Structure](https://docs.konghq.com/1.0.x/plugin-development/file-structure/)
   * Lua rocks
     * specify in the app's `Rockfile`
     * each line is `{NAME} {VERSION}`
@@ -68,7 +68,7 @@ git push heroku master
     * set automatically by the Heroku dyno manager
   * `DATABASE_URL`
     * set automatically by [Heroku Postgres add-on](https://elements.heroku.com/addons/heroku-postgresql)
-  * Kong itself may be configured with [`KONG_` prefixed variables](https://docs.konghq.com/0.14.x/configuration/#environment-variables)
+  * Kong itself may be configured with [`KONG_` prefixed variables](https://docs.konghq.com/1.0.x/configuration/#environment-variables)
   * Heroku build configuration:
     * These variables only effect new deployments.
     * `KONG_RUNTIME_ARCHIVE_URL` location of [pre-compiled Kong runtime archive](DEV.md#pre-compiled-runtime-archive)
@@ -76,7 +76,7 @@ git push heroku master
     * `KONG_GIT_URL` git repo URL for Kong source
       * default: `https://github.com/kong/kong.git`
     * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-      * default: `master`
+      * default: `1.0.0`
 
 
 #### Using Environment Variables in Plugins
@@ -92,7 +92,7 @@ To use env vars within your own code.
 
 #### Nginx config
 
-Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://docs.konghq.com/0.14.x/configuration/#custom-nginx-configuration) or [this included sample](config/nginx.template.sample).
+Kong is an Nginx-based application. To customize the underlying Nginx configuration, commit the file `config/nginx.template` with contents based on [the docs](https://docs.konghq.com/1.0.x/configuration/#custom-nginx-templates) or [this included sample](config/nginx.template.sample).
 
 #### Pre-release script
 
@@ -106,7 +106,7 @@ Simply commit your executable script to the app's repo as `bin/prerelease`, and 
 
 This buildpack supports [Heroku CI](https://devcenter.heroku.com/articles/heroku-ci) to automate test runs and integrate with deployment workflow.
 
-Tests should follow the [Kong plugin testing](https://docs.konghq.com/0.14.x/plugin-development/tests/) guide.
+Tests should follow the [Kong plugin testing](https://docs.konghq.com/1.0.x/plugin-development/tests/) guide.
 
 App requirements:
 
@@ -118,7 +118,7 @@ Background
 ----------
 We vendor the sources for Lua, LuaRocks, & OpenResty/Nginx and compile them with a writable `/app/kong-runtime` prefix. Attempts to bootstrap Kong on Heroku using existing [Lua](https://github.com/leafo/heroku-buildpack-lua) & [apt](https://github.com/heroku/heroku-buildpack-apt) buildpacks failed due to their compile-time prefixes of `/usr/local` which is read-only in a dyno.
 
-OpenSSL 1.0.2 (required by OpenResty) is also compiled from source.
+OpenSSL (version required by OpenResty) is also compiled from source.
 
 ### Modification
 
