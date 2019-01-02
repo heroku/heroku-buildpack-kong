@@ -12,7 +12,13 @@ set -o pipefail
 BUILD_DIR="${1:-}"
 ENV_DIR="${2:-}"
 
+cd ${BUILD_DIR}
+
+# Load runtime environment
+source $BUILD_DIR/.profile.d/kong-env
+
 # Reexports to test config
+export KONG_TEST_DATABASE=postgres
 export KONG_TEST_PG_USER="${KONG_PG_USER}"
 export KONG_TEST_PG_PASSWORD="${KONG_PG_PASSWORD}"
 export KONG_TEST_PG_HOST="${KONG_PG_HOST}"
@@ -21,11 +27,10 @@ export KONG_TEST_PG_DATABASE="${KONG_PG_DATABASE}"
 export KONG_TEST_PG_SSL="${KONG_PG_SSL:-on}"
 # Use test config in the app.
 export KONG_CONF="spec/kong_tests.conf"
+if [ ! -f "$BUILD_DIR/$KONG_CONF" ]
+then
+  echo "App must include '$KONG_CONF' file for test configuration."
+  exit 2
+fi
 
-cd ${BUILD_DIR}
-
-# Initialize the database.
-kong migrations up -c $KONG_CONF
-
-# Run tests.
-bin/heroku-buildpack-kong-busted
+bin/heroku-buildpack-kong-busted -o gtest -v

@@ -1,7 +1,7 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org/about/)
 =========================
 
-Deploy [Kong 0.14 Community Edition](https://konghq.com/kong-community-edition/) as a Heroku app.
+Deploy [Kong 1.0.0](https://konghq.com) as a Heroku app.
 
 🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
 
@@ -30,7 +30,7 @@ mkdir $APP_NAME
 cd $APP_NAME
 git init
 heroku create $APP_NAME
-heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git
+heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git#kong-1.0
 heroku addons:create heroku-postgresql:hobby-dev
 ```
 
@@ -53,7 +53,7 @@ git push heroku master
   * [Kong plugins](https://getkong.org/plugins/)
     * [Development guide](https://docs.konghq.com/0.14.x/plugin-development/)
     * `lib/kong/plugins/{NAME}`
-    * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua` 
+    * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua`
     * See: [Plugin File Structure](https://docs.konghq.com/0.14.x/plugin-development/file-structure/)
   * Lua rocks
     * specify in the app's `Rockfile`
@@ -83,7 +83,7 @@ git push heroku master
 
 To use env vars within your own code.
 
-  1. Whitelist the variable name for use within Nginx 
+  1. Whitelist the variable name for use within Nginx
      * In a custom Nginx config file add `env MY_VARIABLE;`
      * See: [Nginx config](#user-content-nginx-config) (below)
   2. Access the variable in Lua plugins

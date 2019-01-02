@@ -1,6 +1,13 @@
 Upgrading the Kong buildpack for Heroku
 =======================================
 
+[v7.0.0](https://github.com/heroku/heroku-buildpack-kong/releases/tag/v7.0.0)
+------
+
+🚨 **Potentially breaking change** major version upgrade from Kong 0.14 to 1.0.
+
+👓 See [Kong's official upgrade path](https://github.com/Kong/kong/blob/master/UPGRADE.md).
+
 
 [v6.0.0](https://github.com/heroku/heroku-buildpack-kong/releases/tag/v6.0.0)
 ------

@@ -28,7 +28,7 @@ mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
 IS_CUSTOM_BUILD=false
-RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v6.0.0.tgz}"
+RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v7.0.0.tgz}"
 
 # Source for Kong
 if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
@@ -44,7 +44,7 @@ then
   IS_CUSTOM_BUILD=true
   KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
 else
-  KONG_GIT_COMMITISH="0.14.1"
+  KONG_GIT_COMMITISH="1.0.0"
 fi
 
 KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
@@ -54,7 +54,7 @@ KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 # These correspond to the archives in `vendor/`.
 # If upgrading any those archives, then update the corresponding version here.
 LUAROCKS_VERSION=2.4.4
-OPENSSL_VERSION=1.0.2o
+OPENSSL_VERSION=1.1.1
 OPENRESTY_VERSION=1.13.6.2
 
 function error() {
@@ -94,7 +94,7 @@ for PACKAGE in $(cat $BP_DIR/Aptfile $BUILD_DIR/Aptfile); do
     curl -s -L -z $PACKAGE_FILE -o $PACKAGE_FILE $PACKAGE 2>&1 | indent
   else
     topic "Fetching .debs for $PACKAGE"
-    apt-get $APT_OPTIONS -y --force-yes -d install --reinstall $PACKAGE | indent
+    apt-get $APT_OPTIONS -y --allow-downgrades --allow-remove-essential --allow-change-held-packages -d install --reinstall $PACKAGE | indent
   fi
 done
 
@@ -172,7 +172,7 @@ else
   elif [ "$DIFF_STATUS" == 0 ] || [ "$DIFF_STATUS" == 1 ]
   then
     topic "Changes detected"
-    IFS=$'\n' 
+    IFS=$'\n'
     for DIFF_LINE in $(cat "$VENDOR_DIFF"); do
       echo "       $DIFF_LINE"
     done
@@ -198,7 +198,18 @@ else
     topic "Building OpenResty"
     tar -xf openresty-${OPENRESTY_VERSION}.tar.gz
     cd openresty-${OPENRESTY_VERSION}
-    ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
+    ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
+
+    # BEGIN Temporary workaround for "undefined reference to `pthread_atfork'"
+    # until OpenResty upgrades from nginx-1.13.6 to at least 1.13.11.
+    # https://github.com/openssl/openssl/issues/3884#issuecomment-333350227
+    #
+    # version contained by current OpenResty version, this will break when OpenResty is upgraded
+    nginx_Makefile="build/nginx-1.13.6/objs/Makefile"
+    gawk '/pthread/ { sub(/-lpthread /, ""); sub(/-lpthread /, ""); sub(/\\/, "-lpthread \\"); print } ! /pthread/ { print }' \
+      ${nginx_Makefile} > ${nginx_Makefile}-forOpenResty && mv ${nginx_Makefile}-forOpenResty ${nginx_Makefile}
+    # END Temporary workaround for "undefined reference to `pthread_atfork'"
+
     make
     make install
     cd ..
@@ -210,7 +221,7 @@ else
     ./configure --prefix=${APP_PREFIX} --lua-suffix=jit --with-lua=${APP_PREFIX}/luajit --with-lua-include=${APP_PREFIX}/luajit/include/luajit-2.1
     make build
     make install
-    cd ..  
+    cd ..
 
 
     topic "Caching build"

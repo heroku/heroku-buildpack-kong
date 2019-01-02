@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -eu
 
-export KONG_CONF="${KONG_CONF:-config/kong.conf}"
-
 echo "Checking connection to Postgres database"
 database_fails=1
 while ! psql $DATABASE_URL --quiet --output /dev/null -c "SELECT 1"
@@ -23,4 +21,5 @@ then
   ./bin/prerelease
 fi
 
+kong migrations bootstrap -c $KONG_CONF
 kong migrations up -c $KONG_CONF $@

@@ -41,7 +41,7 @@ git push heroku master
 `heroku run bash` to app, and then capture the artifacts:
 
 ```bash
-BUILDPACK_RELEASE_TAG=v6.0.0
+BUILDPACK_RELEASE_TAG=v7.0.0
 ARCHIVE_NAME=kong-runtime-$BUILDPACK_RELEASE_TAG.tgz
 tar czfv $ARCHIVE_NAME ./kong-runtime
 aws s3 cp $ARCHIVE_NAME s3://kong-on-heroku/
