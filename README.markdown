@@ -30,7 +30,7 @@ mkdir $APP_NAME
 cd $APP_NAME
 git init
 heroku create $APP_NAME
-heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git#kong-1.0
+heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git
 heroku addons:create heroku-postgresql:hobby-dev
 ```
 
