@@ -98,9 +98,9 @@ Kong is an Nginx-based application. To customize the underlying Nginx configurat
 
 This buildpack installs a [release phase](https://devcenter.heroku.com/articles/release-phase) script to automatically run Kong's database migrations for each deployment.
 
-Apps can define a custom pre-release script which will be automatically invoked before the built-in release phase script.
+Apps can define a custom pre/post-release script which will be automatically invoked before/after the built-in release phase script.
 
-Simply commit your executable script to the app's repo as `bin/prerelease`, and then that script will be run for every release. The release will fail if the script exits with non-zero status.
+Simply commit your executable script to the app's repo as `bin/prerelease` or `bin/postrelease`, and then that script will be run for every release. The release will fail if the script exits with non-zero status.
 
 #### Testing
 

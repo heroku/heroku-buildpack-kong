@@ -23,3 +23,9 @@ fi
 
 kong migrations bootstrap -c $KONG_CONF
 kong migrations up -c $KONG_CONF $@
+
+if [ -x "bin/postrelease" ]
+then
+  echo "Running app's bin/postrelease"
+  ./bin/postrelease
+fi
