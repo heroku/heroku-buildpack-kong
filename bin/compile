@@ -44,7 +44,7 @@ then
   IS_CUSTOM_BUILD=true
   KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
 else
-  KONG_GIT_COMMITISH="1.1.0rc1"
+  KONG_GIT_COMMITISH="1.1.0rc2"
 fi
 
 KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
@@ -54,7 +54,7 @@ KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 # These correspond to the archives in `vendor/`.
 # If upgrading any those archives, then update the corresponding version here.
 LUAROCKS_VERSION=2.4.4
-OPENSSL_VERSION=1.1.1
+OPENSSL_VERSION=1.1.1b
 OPENRESTY_VERSION=1.13.6.2
 
 function error() {
