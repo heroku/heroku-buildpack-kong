@@ -30,7 +30,7 @@ mkdir $APP_NAME
 cd $APP_NAME
 git init
 heroku create $APP_NAME
-heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git
+heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git#kong-1.1.0
 heroku addons:create heroku-postgresql:hobby-dev
 ```
 
@@ -76,7 +76,7 @@ git push heroku master
     * `KONG_GIT_URL` git repo URL for Kong source
       * default: `https://github.com/kong/kong.git`
     * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-      * default: `1.1.0rc1`
+      * default: `1.1.0rc2`
 
 
 #### Using Environment Variables in Plugins
