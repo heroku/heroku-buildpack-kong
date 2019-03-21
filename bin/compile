@@ -28,7 +28,7 @@ mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
 IS_CUSTOM_BUILD=false
-RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v7.0.2.tgz}"
+RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v8.0.0-rc2.tgz}"
 
 # Source for Kong
 if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
@@ -44,7 +44,7 @@ then
   IS_CUSTOM_BUILD=true
   KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
 else
-  KONG_GIT_COMMITISH="1.0.2"
+  KONG_GIT_COMMITISH="1.1.0rc2"
 fi
 
 KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
@@ -54,7 +54,7 @@ KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 # These correspond to the archives in `vendor/`.
 # If upgrading any those archives, then update the corresponding version here.
 LUAROCKS_VERSION=2.4.4
-OPENSSL_VERSION=1.1.1
+OPENSSL_VERSION=1.1.1b
 OPENRESTY_VERSION=1.13.6.2
 
 function error() {

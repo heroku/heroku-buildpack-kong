@@ -1,7 +1,7 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org/about/)
 =========================
 
-Deploy [Kong 1.0.2](https://konghq.com) as a Heroku app.
+Deploy [Kong 1.1.0rc2](https://konghq.com) as a Heroku app.
 
 🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
 
@@ -30,7 +30,7 @@ mkdir $APP_NAME
 cd $APP_NAME
 git init
 heroku create $APP_NAME
-heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git
+heroku buildpacks:set https://github.com/heroku/heroku-buildpack-kong.git#kong-1.1.0
 heroku addons:create heroku-postgresql:hobby-dev
 ```
 
@@ -76,7 +76,7 @@ git push heroku master
     * `KONG_GIT_URL` git repo URL for Kong source
       * default: `https://github.com/kong/kong.git`
     * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-      * default: `1.0.2`
+      * default: `1.1.0rc2`
 
 
 #### Using Environment Variables in Plugins
@@ -98,9 +98,9 @@ Kong is an Nginx-based application. To customize the underlying Nginx configurat
 
 This buildpack installs a [release phase](https://devcenter.heroku.com/articles/release-phase) script to automatically run Kong's database migrations for each deployment.
 
-Apps can define a custom pre-release script which will be automatically invoked before the built-in release phase script.
+Apps can define a custom pre/post-release script which will be automatically invoked before/after the built-in release phase script.
 
-Simply commit your executable script to the app's repo as `bin/prerelease`, and then that script will be run for every release. The release will fail if the script exits with non-zero status.
+Simply commit your executable script to the app's repo as `bin/prerelease` or `bin/postrelease`, and then that script will be run for every release. The release will fail if the script exits with non-zero status.
 
 #### Testing
 
