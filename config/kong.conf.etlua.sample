@@ -58,6 +58,20 @@ admin_error_log = /dev/stderr             # Path for Admin API request error
                                           # adjusted by the `log_level`
                                           # directive.
 
+#status_access_log = off                  # Path for Status API request access
+                                          # logs. The default value of `off`
+                                          # implies that loggin for this API
+                                          # is disabled by default.
+                                          # If this value is a relative path,
+                                          # it will be placed under the
+                                          # `prefix` location.
+
+#status_error_log = logs/status_error.log # Path for Status API request error
+                                          # logs. The granularity of these logs
+                                          # is adjusted by the `log_level`
+                                          # property.
+
+
 plugins = bundled,hello-world-header,ndfd-xml-as-json
                                  # Comma-separated list of plugins this node
                                  # should load. By default, only plugins
@@ -89,6 +103,14 @@ plugins = bundled,hello-world-header,ndfd-xml-as-json
                                  #
                                  # - plugins = off
                                  #     > will not load any plugin
+
+go_pluginserver_exe = /app/kong-runtime/bin/go-pluginserver
+                                 # Path for the go-pluginserver executable,
+                                 # used for running Kong plugins written in Go.
+
+go_plugins_dir = /app/kong-runtime/go-plugins                # Directory for installing Kong plugins
+                                 # written in Go.
+                                 #
 
 #anonymous_reports = on          # Send anonymous usage data such as error
                                  # stack traces to help improve Kong.

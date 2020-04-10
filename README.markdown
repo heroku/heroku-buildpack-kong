@@ -1,7 +1,7 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org/about/)
 =========================
 
-Deploy [Kong 1.0.2](https://konghq.com) as a Heroku app.
+Deploy [Kong 2.0.3](https://konghq.com) as a Heroku app.
 
 🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
 
@@ -51,7 +51,7 @@ git push heroku master
 #### Plugins & other Lua source
 
   * [Kong plugins](https://docs.konghq.com/hub/)
-    * [Development guide](https://docs.konghq.com/1.0.x/plugin-development/)
+  * [Development guide](https://docs.konghq.com/2.0.x/plugin-development/)
     * `lib/kong/plugins/{NAME}`
     * Add each Kong plugin name to the `custom_plugins` comma-separated list in `config/kong.conf.etlua`
     * See: [Plugin File Structure](https://docs.konghq.com/1.0.x/plugin-development/file-structure/)
@@ -76,7 +76,7 @@ git push heroku master
     * `KONG_GIT_URL` git repo URL for Kong source
       * default: `https://github.com/kong/kong.git`
     * `KONG_GIT_COMMITISH` git branch/tag/commit for Kong source
-      * default: `1.0.2`
+      * default: `2.0.3`
 
 
 #### Using Environment Variables in Plugins

@@ -22,4 +22,4 @@ then
 fi
 
 kong migrations bootstrap -c $KONG_CONF
-kong migrations up -c $KONG_CONF $@
+kong migrations up -c $KONG_CONF && kong migrations finish -c $KONG_CONF $@

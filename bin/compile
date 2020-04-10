@@ -28,7 +28,7 @@ mkdir -p $BP_CACHE_DIR
 PREFIX_CACHE_DIR=$BP_CACHE_DIR/app_prefix
 
 IS_CUSTOM_BUILD=false
-RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://s3-us-west-1.amazonaws.com/kong-on-heroku/kong-runtime-v7.0.2.tgz}"
+RUNTIME_ARCHIVE_URL="${KONG_RUNTIME_ARCHIVE_URL:-https://www.dropbox.com/s/wf9803q82pikdcb/kong-runtime-v2.0.3.tgz}"
 
 # Source for Kong
 if [ -f "${ENV_DIR}/KONG_GIT_URL" ]
@@ -44,7 +44,7 @@ then
   IS_CUSTOM_BUILD=true
   KONG_GIT_COMMITISH=`cat ${ENV_DIR}/KONG_GIT_COMMITISH`
 else
-  KONG_GIT_COMMITISH="1.0.2"
+  KONG_GIT_COMMITISH="2.0.3"
 fi
 
 KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
@@ -53,9 +53,10 @@ KONG_SOURCE_DIR="${BP_CACHE_DIR}/kong-source"
 # Set dependency versions.
 # These correspond to the archives in `vendor/`.
 # If upgrading any those archives, then update the corresponding version here.
-LUAROCKS_VERSION=2.4.4
-OPENSSL_VERSION=1.1.1
-OPENRESTY_VERSION=1.13.6.2
+LUAROCKS_VERSION=3.3.1
+OPENSSL_VERSION=1.1.1d
+OPENRESTY_VERSION=1.15.8.3
+GOLANG_VERSION=1.13.7
 
 function error() {
   echo " !     $*" >&2
@@ -109,7 +110,7 @@ topic "Writing profile script"
 mkdir -p $BUILD_DIR/.profile.d
 # ~~~~~ Keep these values in sync with the build-time exports below ~~~~~
 cat <<EOF >$BUILD_DIR/.profile.d/000_buildpack_kong.sh
-export PATH="\$HOME/${KONG_RUNTIME}/nginx/sbin:\$HOME/${KONG_RUNTIME}/luajit/bin:\$HOME/${KONG_RUNTIME}/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
+export PATH="\$HOME/${KONG_RUNTIME}/nginx/sbin:\$HOME/${KONG_RUNTIME}/luajit/bin:\$HOME/${KONG_RUNTIME}/bin:\$HOME/${KONG_RUNTIME}/go/bin:\$HOME/.apt/usr/local/bin:\$HOME/.apt/usr/bin:\$HOME/.apt/usr/sbin:\$PATH"
 export LD_LIBRARY_PATH="\$HOME/${KONG_RUNTIME}/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LD_LIBRARY_PATH"
 export LIBRARY_PATH="\$HOME/${KONG_RUNTIME}/lib:\$HOME/.apt/usr/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib:\$HOME/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:\$LIBRARY_PATH"
 export INCLUDE_PATH="\$HOME/${KONG_RUNTIME}/include:\$HOME/.apt/usr/local/include:\$HOME/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include:\$INCLUDE_PATH"
@@ -118,13 +119,15 @@ export CPPPATH="\$INCLUDE_PATH"
 export PKG_CONFIG_PATH="\$HOME/.apt/usr/local/lib/pkgconfig:\$HOME/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:\$HOME/.apt/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"
 export LUA_PATH="\$HOME/lib/?.lua;\$HOME/lib/?/init.lua;\$HOME/.luarocks/share/lua/5.1/?.lua;\$HOME/.luarocks/share/lua/5.1/?/init.lua;\$HOME/${KONG_RUNTIME}/share/lua/5.1/?.lua;\$HOME/${KONG_RUNTIME}/share/lua/5.1/?/init.lua;./?.lua"
 export LUA_CPATH="\$HOME/lib/?.so;\$HOME/.luarocks/lib/lua/5.1/?.so;\$HOME/${KONG_RUNTIME}/lib/lua/5.1/?.so;./?.so"
+export GOPATH=\$HOME/${KONG_RUNTIME}
 EOF
 
 # ~~~~~ Keep these values in sync with the runtime profile script above ~~~~~
-export PATH="$APP_PREFIX/nginx/sbin:$APP_PREFIX/luajit/bin:$APP_PREFIX/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
+export PATH="$APP_PREFIX/nginx/sbin:$APP_PREFIX/luajit/bin:$APP_PREFIX/bin:$APP_PREFIX/go/bin:$BUILD_DIR/.apt/usr/local/bin:$BUILD_DIR/.apt/usr/bin:$BUILD_DIR/.apt/usr/sbin:/sbin:$PATH"
 export LD_LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
 export LIBRARY_PATH="$APP_PREFIX/lib:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/local/lib:$BUILD_DIR/.apt/usr/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib"
 export INCLUDE_PATH="$APP_PREFIX/include:$BUILD_DIR/.apt/usr/local/include:$BUILD_DIR/.apt/usr/include:/usr/include/x86_64-linux-gnu:/usr/include"
+export GOPATH=$APP_PREFIX
 export CPATH="$INCLUDE_PATH"
 export CPPPATH="$INCLUDE_PATH"
 export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/local/lib/pkgconfig:$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig"
@@ -136,8 +139,8 @@ export | grep -E -e ' (PATH|LD_LIBRARY_PATH|LIBRARY_PATH|INCLUDE_PATH|CPATH|CPPP
 
 if [ $IS_CUSTOM_BUILD = false ]
 then
-  topic "Installing Kong for buildpack from ${RUNTIME_ARCHIVE_URL}"
-  curl --silent --location "${RUNTIME_ARCHIVE_URL}" | tar xzm -C "${APP_PREFIX}" --strip-components=2
+ topic "Installing Kong for buildpack from ${RUNTIME_ARCHIVE_URL}"
+ curl --silent --location "${RUNTIME_ARCHIVE_URL}" | tar xzm -C "${APP_PREFIX}" --strip-components=2
 else
 
   # Proceed with build from source
@@ -200,16 +203,6 @@ else
     cd openresty-${OPENRESTY_VERSION}
     ./configure --prefix=$APP_PREFIX --with-pcre-jit --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module --with-openssl=${VENDOR_CACHE_DIR}/openssl-${OPENSSL_VERSION}
 
-    # BEGIN Temporary workaround for "undefined reference to `pthread_atfork'"
-    # until OpenResty upgrades from nginx-1.13.6 to at least 1.13.11.
-    # https://github.com/openssl/openssl/issues/3884#issuecomment-333350227
-    #
-    # version contained by current OpenResty version, this will break when OpenResty is upgraded
-    nginx_Makefile="build/nginx-1.13.6/objs/Makefile"
-    gawk '/pthread/ { sub(/-lpthread /, ""); sub(/-lpthread /, ""); sub(/\\/, "-lpthread \\"); print } ! /pthread/ { print }' \
-      ${nginx_Makefile} > ${nginx_Makefile}-forOpenResty && mv ${nginx_Makefile}-forOpenResty ${nginx_Makefile}
-    # END Temporary workaround for "undefined reference to `pthread_atfork'"
-
     make
     make install
     cd ..
@@ -259,7 +252,23 @@ else
   luarocks install --local ./kong-*.rockspec
   mkdir -p ${APP_PREFIX}/bin
   mv bin/* ${APP_PREFIX}/bin/
+
+  RESTY_KONG_TLS_VERSION=0.0.6
+  RESTY_KONG_TLS_GITHUB_URI=https://raw.githubusercontent.com/Kong/lua-kong-nginx-module
+  RESTY_KONG_TLS_FILE_URI=$RESTY_KONG_TLS_GITHUB_URI/$RESTY_KONG_TLS_VERSION/lualib/resty/kong/tls.lua
+  LUAROCKS_SHARE=/app/kong-runtime/share/lua/5.1
+  mkdir -p $LUAROCKS_SHARE/resty/kong
+  curl -sSL $RESTY_KONG_TLS_FILE_URI -o $LUAROCKS_SHARE/resty/kong/tls.lua
+
+  topic "Downloading and installing golang"
+  ##download and install golang
+  GO_URL=https://dl.google.com/go/go${GOLANG_VERSION}.linux-amd64.tar.gz
+  curl $GO_URL -o go${GOLANG_VERSION}.linux-amd64.tar.gz
+  tar -xz -f go${GOLANG_VERSION}.linux-amd64.tar.gz -C $APP_PREFIX
+  go get github.com/Kong/go-pluginserver
+  mkdir ${APP_PREFIX}/go-plugins
 fi
+
 
 topic "Installing Lua rocks specified in Rockfile"
 cd ${BUILD_DIR}
@@ -290,3 +299,6 @@ if [ ! "$BUILD_DIR" = "/app" ]; then
   topic "Making build artifacts available to app"
   mv $APP_PREFIX $BUILD_DIR/$KONG_RUNTIME
 fi
+
+
+
