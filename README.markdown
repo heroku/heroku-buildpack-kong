@@ -1,6 +1,8 @@
 [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) for [Kong](https://getkong.org/about/)
 =========================
 
+⚠️  **This project is no longer maintained.**
+
 Deploy [Kong 1.0.2](https://konghq.com) as a Heroku app.
 
 🔬👩‍💻 This software is a community proof-of-concept: [MIT license](LICENSE)
